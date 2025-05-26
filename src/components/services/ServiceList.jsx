@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Box, Container } from '@mui/material';
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '@/context/ThemeProvider';
 import ScrollableSection from '../common/ScrollableSection';
 import ServiceImage from './ServiceImage';
 

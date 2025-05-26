@@ -1,7 +1,7 @@
 'use client';
 import React from "react";
 import { Card, CardMedia, CardContent, Typography } from "@mui/material";
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '@/context/ThemeProvider';
 
 export default function ServiceImage({ image, name, id }) {
   const { colors, isDarkMode } = useTheme();

@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Box, Container, Typography, Divider, Link } from '@mui/material';
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '@/context/ThemeProvider';
 
 const Footer = () => {
   const { colors, isDarkMode } = useTheme();

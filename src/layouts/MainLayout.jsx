@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Box } from '@mui/material';
-import { ThemeProvider, useTheme } from '../context/ThemeProvider';
+import { ThemeProvider, useTheme } from '@/context/ThemeProvider';
 import Header from './common/Header';
 import Footer from './common/Footer';
 
