@@ -4,27 +4,20 @@ import { Container } from '@mui/material';
 import MainLayout from '../../layouts/MainLayout';
 import {
   Add as AddIcon,
-  Refresh as RefreshIcon,
-  Search as SearchIcon,
-  ArrowBack as ArrowBackIcon,
-  ArrowForward as ArrowForwardIcon,
   PlayArrow as PlayArrowIcon,
-  Stop as StopIcon,
   Check as CheckIcon,
   Warning as WarningIcon,
   Settings as SettingsIcon,
   Storage as StorageIcon,
   Language as LanguageIcon,
   Code as CodeIcon,
-  Memory as MemoryIcon,
-  LightMode as LightModeIcon,
-  DarkMode as DarkModeIcon
+  Memory as MemoryIcon
 } from '@mui/icons-material';
 
 import StatsCardList from '@/components/dashboard/StatsCardList';
 import SearchAndFilters from '@/components/dashboard/SearchAndFilters';
 import ServiceCardList from '@/components/dashboard/ServiceCardList';
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '@/context/ThemeProvider';
 import { Box } from '@mui/material';
 
 // Types de services

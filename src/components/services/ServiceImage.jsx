@@ -45,7 +45,6 @@ export default function ServiceImage({ image, name, id }) {
         }}
       />
       
-      {/* Overlay with name on hover */}
       <CardContent
         className="MuiCardContent-root"
         sx={{
