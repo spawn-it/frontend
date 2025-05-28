@@ -14,9 +14,9 @@ export const categories = [
       id: 'servers',
       name: 'Server Types',
       items: [
-        { id: 'hosting', name: 'Simple Hosting', image: 'https://www.shutterstock.com/image-photo/data-centers-filled-rows-servers-600nw-2502153963.jpg' },
+        { id: 'minio', name: 'MinIO', image: 'https://www.shutterstock.com/image-photo/data-centers-filled-rows-servers-600nw-2502153963.jpg' },
         { id: 'loadbalancer', name: 'Load Balancer', image: 'https://media.istockphoto.com/id/1132382596/photo/aerial-top-view-highway-road-intersection-roundabout-or-circle-at-night-for-transportation.jpg?s=612x612&w=0&k=20&c=fbCg3NLpqG61gNYinUCLTnYaWUaSy1uJTCU-a7XtntM=' },
-        { id: 'k8s', name: 'Kubernetes Node', image: 'https://miro.medium.com/v2/resize:fit:1200/0*dEKpDVaBEslRnpeM.jpeg' },
+        { id: 'kubernetes-node', name: 'Kubernetes Node', image: 'https://miro.medium.com/v2/resize:fit:1200/0*dEKpDVaBEslRnpeM.jpeg' },
         { id: 'postgresql', name: 'PostgreSQL', image: 'https://netlibsecurity.com/wp-content/uploads/2024/10/PostgreSQL_NetLib_Encryptionizer.png' }
       ]
     },

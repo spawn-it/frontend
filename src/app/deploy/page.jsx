@@ -1,7 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Box, Container, Paper } from '@mui/material';
-import MainLayout from '../../layouts/MainLayout';
+import MainLayout from '@/layouts/MainLayout';
 import { useTheme } from '@/context/ThemeProvider';
 
 import DeployHeader from '@/components/deploy/DeployHeader';
@@ -12,12 +13,47 @@ import ServiceDetails from '@/components/deploy/steps/ServiceDetails';
 import ReviewConfiguration from '@/components/deploy/steps/ReviewConfiguration';
 import NavigationButtons from '@/components/deploy/NavigationButtons';
 
-import { deployConfig as initialConfig, steps } from '@/data/deployData';
+import { steps, infrastructureProviders } from '@/data/deployData';
+import { getCatalog } from '@/services/catalogService';
+import { getTemplate } from '@/services/templateService';
 
 function DeployFlowContent() {
     const { colors } = useTheme();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const selectedServiceName = searchParams.get('service');
+
     const [currentStep, setCurrentStep] = useState(0);
-    const [deployConfig, setDeployConfig] = useState(initialConfig);
+    const [deployConfig, setDeployConfig] = useState({});
+    const [availableServices, setAvailableServices] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        getCatalog()
+            .then(async (services) => {
+                setAvailableServices(services);
+
+                if (selectedServiceName) {
+                    const found = services.flatMap(category => category.items)
+                        .find(s => s.name.toLowerCase() === selectedServiceName.toLowerCase());
+
+                    if (found) {
+                        try {
+                            const template = await getTemplate(found.template_file);
+                            setDeployConfig({
+                                ...template.instance,
+                                service: found.name
+                            });
+                        } catch (error) {
+                            console.error('Erreur lors du chargement du template:', error);
+                            setDeployConfig({ service: found.name });
+                        }
+                    }
+                }
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, [selectedServiceName]);
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1);
@@ -29,37 +65,21 @@ function DeployFlowContent() {
 
     const updateConfig = (key, value) => {
         setDeployConfig(prev => ({ ...prev, [key]: value }));
+        if (key === 'service') {
+            router.push(`/deploy?service=${value}`);
+        }
     };
 
     const renderStepContent = () => {
         switch (currentStep) {
             case 0:
-                return (
-                    <ServiceSelection
-                        deployConfig={deployConfig}
-                        updateConfig={updateConfig}
-                    />
-                );
+                return <ServiceSelection deployConfig={deployConfig} updateConfig={updateConfig} services={availableServices} />;
             case 1:
-                return (
-                    <ProviderSelection
-                        deployConfig={deployConfig}
-                        updateConfig={updateConfig}
-                    />
-                );
+                return <ProviderSelection deployConfig={deployConfig} updateConfig={updateConfig} />;
             case 2:
-                return (
-                    <ServiceDetails
-                        deployConfig={deployConfig}
-                        updateConfig={updateConfig}
-                    />
-                );
+                return <ServiceDetails deployConfig={deployConfig} updateConfig={updateConfig} />;
             case 3:
-                return (
-                    <ReviewConfiguration
-                        deployConfig={deployConfig}
-                    />
-                );
+                return <ReviewConfiguration deployConfig={deployConfig} services={availableServices} providers={infrastructureProviders} />;
             default:
                 return null;
         }
@@ -72,21 +92,17 @@ function DeployFlowContent() {
             color: colors.text,
             transition: 'all 0.3s'
         }}>
-            <DeployHeader deployConfig={deployConfig} />
+            <DeployHeader deployConfig={deployConfig} services={availableServices} />
             <DeploySteps steps={steps} currentStep={currentStep} />
 
             <Container maxWidth="lg" sx={{ mt: 4 }}>
-                <Paper
-                    elevation={0}
-                    sx={{
-                        p: 4,
-                        borderRadius: 2,
-                        border: `1px solid ${colors.border}`,
-                        bgcolor: colors.paper
-                    }}
-                >
+                <Paper elevation={0} sx={{
+                    p: 4,
+                    borderRadius: 2,
+                    border: `1px solid ${colors.border}`,
+                    bgcolor: colors.paper
+                }}>
                     {renderStepContent()}
-
                     <NavigationButtons
                         currentStep={currentStep}
                         totalSteps={steps.length}
@@ -99,12 +115,10 @@ function DeployFlowContent() {
     );
 }
 
-function DeployFlow() {
+export default function DeployFlow() {
     return (
         <MainLayout>
             <DeployFlowContent />
         </MainLayout>
     );
 }
-
-export default DeployFlow;

@@ -7,8 +7,6 @@ import ProviderCard from '../ProviderCard';
 import { infrastructureProviders } from '@/data/deployData';
 
 const ProviderSelection = ({ deployConfig, updateConfig }) => {
-    const { colors } = useTheme();
-
     return (
         <Box>
             <ScrollableSection

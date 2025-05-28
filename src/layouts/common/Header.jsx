@@ -9,7 +9,7 @@ import {
     Container,
     Toolbar,
     Switch,
-    Stack
+    Stack, Link
 } from '@mui/material';
 import {
     LightMode as LightModeIcon,
@@ -70,18 +70,19 @@ const Header = ({ signedIn = false, menuItems }) => {
         >
             <Container maxWidth="lg">
                 <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
-                    {/* Logo */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box
-                            component="img"
-                            sx={{
-                                width: 150,
-                                borderRadius: 1,
-                            }}
-                            src="/logo.svg"
-                            alt="SpawnIt Logo"
-                        />
-                    </Box>
+                    <Link href="/" passHref>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box
+                                component="img"
+                                sx={{
+                                    width: 150,
+                                    borderRadius: 1,
+                                }}
+                                src="/logo.svg"
+                                alt="SpawnIt Logo"
+                            />
+                        </Box>
+                    </Link>
 
                     {/* Navigation + Actions */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

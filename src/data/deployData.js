@@ -3,11 +3,10 @@
 export const infrastructureProviders = [
     {
         id: 'docker',
-        name: 'Docker',
+        name: 'Docker (Local)',
         description: 'Déployer sur des conteneurs Docker',
         icon: '🐳',
         color: 'primary',
-        image: '/api/placeholder/800/400'
     },
     {
         id: 'aws',
@@ -16,7 +15,6 @@ export const infrastructureProviders = [
         icon: '☁️',
         color: 'warning',
         borderColor: 'border-orange-200',
-        image: '/api/placeholder/800/400'
     },
     {
         id: 'gcp',
@@ -25,7 +23,6 @@ export const infrastructureProviders = [
         icon: '🌩️',
         color: 'success',
         borderColor: 'border-green-200',
-        image: '/api/placeholder/800/400'
     }
 ];
 
@@ -54,23 +51,6 @@ export const availableServices = [
         color: 'info',
         image: '/api/placeholder/800/400'
     }
-];
-
-export const availableCpuOptions = [
-    { value: '0.5', label: '0.5 vCPU', price: 'Charges légères' },
-    { value: '1', label: '1 vCPU', price: 'Charges standard' },
-    { value: '2', label: '2 vCPU', price: 'Charges moyennes' },
-    { value: '4', label: '4 vCPU', price: 'Charges lourdes' },
-    { value: '8', label: '8 vCPU', price: 'Charges entreprise' }
-];
-
-export const availableRamOptions = [
-    { value: '512', label: '512 MB', description: 'Applications minimales' },
-    { value: '1024', label: '1 GB', description: 'Petites applications' },
-    { value: '2048', label: '2 GB', description: 'Applications standard' },
-    { value: '4096', label: '4 GB', description: 'Applications moyennes' },
-    { value: '8192', label: '8 GB', description: 'Grandes applications' },
-    { value: '16384', label: '16 GB', description: 'Applications entreprise' }
 ];
 
 export const steps = [

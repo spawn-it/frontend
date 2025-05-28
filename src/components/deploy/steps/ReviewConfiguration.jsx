@@ -2,12 +2,18 @@
 import React from 'react';
 import { Box, Typography, Stack, Divider } from '@mui/material';
 import { useTheme } from '@/context/ThemeProvider';
-import { availableServices, infrastructureProviders } from '@/data/deployData';
 
-const ReviewConfiguration = ({ deployConfig }) => {
+const ReviewConfiguration = ({ deployConfig, services, providers }) => {
     const { colors } = useTheme();
-    const selectedService = availableServices.find(s => s.id === deployConfig.serviceType);
-    const selectedProvider = infrastructureProviders.find(p => p.id === deployConfig.provider);
+
+    const selectedService = services
+        .flatMap(category => category.items)
+        .find(service => service.name === deployConfig.service);
+
+    const selectedProvider = providers.find(p => p.id === deployConfig.provider);
+
+    const portEntries = Object.entries(deployConfig.ports || {});
+    const envVarEntries = Object.entries(deployConfig.env_vars || {});
 
     return (
         <Box>
@@ -16,20 +22,17 @@ const ReviewConfiguration = ({ deployConfig }) => {
             </Typography>
             <Box sx={{ maxWidth: 600 }}>
                 <Stack spacing={3} divider={<Divider sx={{ borderColor: colors.border }} />}>
+
                     <Box>
                         <Typography variant="overline" sx={{ color: colors.textSecondary }}>
                             Type de Service
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                            {selectedService && (
-                                <>
-                                    <Typography variant="h6">{selectedService.icon}</Typography>
-                                    <Typography variant="body1" fontWeight="medium" sx={{ color: colors.text }}>
-                                        {selectedService.name}
-                                    </Typography>
-                                </>
-                            )}
-                            {!selectedService && (
+                            {selectedService ? (
+                                <Typography variant="body1" fontWeight="medium" sx={{ color: colors.text }}>
+                                    {selectedService.label}
+                                </Typography>
+                            ) : (
                                 <Typography variant="body1" sx={{ color: colors.textSecondary }}>
                                     Non sélectionné
                                 </Typography>
@@ -42,15 +45,11 @@ const ReviewConfiguration = ({ deployConfig }) => {
                             Fournisseur d'Infrastructure
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                            {selectedProvider && (
-                                <>
-                                    <Typography variant="h6">{selectedProvider.icon}</Typography>
-                                    <Typography variant="body1" fontWeight="medium" sx={{ color: colors.text }}>
-                                        {selectedProvider.name}
-                                    </Typography>
-                                </>
-                            )}
-                            {!selectedProvider && (
+                            {selectedProvider ? (
+                                <Typography variant="body1" fontWeight="medium" sx={{ color: colors.text }}>
+                                    {selectedProvider.name}
+                                </Typography>
+                            ) : (
                                 <Typography variant="body1" sx={{ color: colors.textSecondary }}>
                                     Non sélectionné
                                 </Typography>
@@ -63,12 +62,13 @@ const ReviewConfiguration = ({ deployConfig }) => {
                             Ports
                         </Typography>
                         <Box sx={{ mt: 1 }}>
-                            {deployConfig.ports.filter(port => port.exposed && port.internal).map((port, index) => (
-                                <Typography key={index} variant="body2" sx={{ color: colors.text, fontFamily: 'monospace' }}>
-                                    {port.exposed} → {port.internal}
-                                </Typography>
-                            ))}
-                            {deployConfig.ports.filter(port => port.exposed && port.internal).length === 0 && (
+                            {portEntries.length > 0 ? (
+                                portEntries.map(([exposed, internal], index) => (
+                                    <Typography key={index} variant="body2" sx={{ color: colors.text, fontFamily: 'monospace' }}>
+                                        {exposed} → {internal}
+                                    </Typography>
+                                ))
+                            ) : (
                                 <Typography variant="body2" sx={{ color: colors.textSecondary }}>
                                     Aucun port configuré
                                 </Typography>
@@ -81,18 +81,20 @@ const ReviewConfiguration = ({ deployConfig }) => {
                             Variables d'Environnement
                         </Typography>
                         <Box sx={{ mt: 1 }}>
-                            {deployConfig.envVars.filter(env => env.key).map((env, index) => (
-                                <Typography key={index} variant="body2" sx={{ fontFamily: 'monospace', color: colors.text }}>
-                                    {env.key}={env.value}
-                                </Typography>
-                            ))}
-                            {deployConfig.envVars.filter(env => env.key).length === 0 && (
+                            {envVarEntries.length > 0 ? (
+                                envVarEntries.map(([key, value], index) => (
+                                    <Typography key={index} variant="body2" sx={{ fontFamily: 'monospace', color: colors.text }}>
+                                        {key}={value}
+                                    </Typography>
+                                ))
+                            ) : (
                                 <Typography variant="body2" sx={{ color: colors.textSecondary }}>
                                     Aucune variable définie
                                 </Typography>
                             )}
                         </Box>
                     </Box>
+
                 </Stack>
             </Box>
         </Box>

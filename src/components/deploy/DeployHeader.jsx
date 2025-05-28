@@ -2,48 +2,30 @@
 import React from 'react';
 import { Box, Container, Typography, alpha } from '@mui/material';
 import { useTheme } from '@/context/ThemeProvider';
-import { availableServices } from '@/data/deployData';
 
-const DeployHeader = ({ deployConfig }) => {
+const DeployHeader = ({ deployConfig, services }) => {
     const { colors, isDarkMode } = useTheme();
-    const selectedService = availableServices.find(s => s.id === deployConfig.serviceType);
+    const selectedService = services
+        .flatMap(category => category.items)
+        .find(service => service.name === deployConfig.service);
+
+
 
     if (selectedService) {
-        // Mapping des couleurs pour les services
-        const getServiceColor = (colorName) => {
-            const colorMap = {
-                'success': '#4caf50',
-                'warning': '#ff9800',
-                'info': '#2196f3',
-                'primary': '#1976d2',
-                'secondary': '#9c27b0'
-            };
-            return colorMap[colorName] || '#1976d2';
-        };
-
-        const serviceColor = getServiceColor(selectedService.color);
-
         return (
             <Box sx={{ position: 'relative', height: 320, overflow: 'hidden' }}>
                 <Box
-                    sx={{
-                        position: 'absolute',
-                        inset: 0,
-                        background: `linear-gradient(to bottom right, ${alpha(serviceColor, 0.6)}, ${serviceColor})`,
-                        opacity: 0.9
-                    }}
-                />
-                <Box
                     component="img"
-                    src={selectedService.image}
-                    alt={selectedService.name}
+                    src={`/img/${selectedService.image_path}`}
+                    alt={selectedService.label}
                     sx={{
                         position: 'absolute',
                         inset: 0,
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover',
-                        mixBlendMode: 'overlay'
+                        opacity: 0.5,
+                        filter: 'brightness(0.5)',
                     }}
                 />
                 <Box sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.3)' }} />
@@ -56,11 +38,8 @@ const DeployHeader = ({ deployConfig }) => {
                     color: 'white'
                 }}>
                     <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant="h1" sx={{ fontSize: '4rem', mb: 2 }}>
-                            {selectedService.icon}
-                        </Typography>
                         <Typography variant="h3" fontWeight="bold" sx={{ color: 'white' }}>
-                            {selectedService.name}
+                            {selectedService.label}
                         </Typography>
                         <Typography variant="h6" sx={{ mt: 1, opacity: 0.9, color: 'white' }}>
                             {selectedService.description}

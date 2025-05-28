@@ -12,7 +12,8 @@ const Footer = () => {
         bgcolor: isDarkMode ? '#0A0A0A' : '#f8f9fa', 
         borderTop: 1, 
         borderColor: colors.border,
-        transition: 'all 0.3s ease'
+        transition: 'all 0.3s ease',
+          mt: 4,
       }}
     >
       <Container maxWidth="lg" sx={{ py: 3 }}>
@@ -21,8 +22,8 @@ const Footer = () => {
             display: 'flex', 
             flexDirection: { xs: 'column', sm: 'row' }, 
             justifyContent: 'space-between', 
-            alignItems: { xs: 'center', sm: 'center' }, 
-            mb: { xs: 3, sm: 0 } 
+            alignItems: { xs: 'center', sm: 'center' },
+            mb: { xs: 3, sm: 0 }
           }}
         >
         </Box>

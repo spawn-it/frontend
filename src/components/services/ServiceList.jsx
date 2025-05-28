@@ -30,9 +30,10 @@ export default function ServiceList({ categories }) {
           >
             {category.items.map((item) => (
               <ServiceImage
-                image={item.image}
-                name={item.name}
-                key={item.id}
+                  link={`/deploy?service=${item.name}`}
+                  image={`/img/${item.image_path}`}
+                  name={item.label}
+                  key={item.name}
               />
             ))}
           </ScrollableSection>

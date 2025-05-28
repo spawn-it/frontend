@@ -7,7 +7,6 @@ import { useTheme } from '@/context/ThemeProvider';
 export default function ServiceCard({ service, isSelected, onSelect }) {
     const { colors, isDarkMode } = useTheme();
 
-    // Mapping des couleurs pour les services
     const getServiceColor = (colorName) => {
         const colorMap = {
             'success': '#4caf50',
@@ -51,11 +50,10 @@ export default function ServiceCard({ service, isSelected, onSelect }) {
                 },
             }}
         >
-            {/* Service Image */}
             <CardMedia
                 component="img"
                 height="160"
-                image={service.image}
+                image={`/img/${service.image_path}`}
                 alt={service.name}
                 sx={{
                     borderRadius: 2,
@@ -66,7 +64,6 @@ export default function ServiceCard({ service, isSelected, onSelect }) {
                 }}
             />
 
-            {/* Selection Indicator */}
             {isSelected && (
                 <Box
                     sx={{
@@ -88,7 +85,6 @@ export default function ServiceCard({ service, isSelected, onSelect }) {
                 </Box>
             )}
 
-            {/* Service Info Overlay */}
             <CardContent
                 className="MuiCardContent-root"
                 sx={{
@@ -121,7 +117,7 @@ export default function ServiceCard({ service, isSelected, onSelect }) {
                             textShadow: "0 1px 3px rgba(0,0,0,0.5)"
                         }}
                     >
-                        {service.name}
+                        {service.label}
                     </Typography>
                 </Box>
                 <Typography

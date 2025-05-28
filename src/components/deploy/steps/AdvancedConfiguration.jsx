@@ -1,60 +1,107 @@
 'use client';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
-    Box,
-    Typography,
-    TextField,
-    Button,
-    Stack,
-    IconButton
+    Box, Typography, TextField, Button, Stack, IconButton, Alert
 } from '@mui/material';
 import {
-    Add as AddIcon,
-    Remove as RemoveIcon,
-    ArrowForward as ArrowForwardIcon
+    Add as AddIcon, Remove as RemoveIcon, ArrowForward as ArrowForwardIcon
 } from '@mui/icons-material';
 import { useTheme } from '@/context/ThemeProvider';
 
 const AdvancedConfiguration = ({ deployConfig, updateConfig }) => {
     const { colors } = useTheme();
 
-    const addPort = () => {
-        updateConfig('ports', [...deployConfig.ports, { exposed: '', internal: '' }]);
-    };
+    const portList = useMemo(() => {
+        if (deployConfig.portList && Array.isArray(deployConfig.portList)) {
+            return deployConfig.portList;
+        }
+        return Object.entries(deployConfig.ports || {}).map(([exposed, internal], index) => ({
+            id: `port-${index}`,
+            exposed,
+            internal
+        }));
+    }, [deployConfig.portList, deployConfig.ports]);
 
-    const updatePort = (index, field, value) => {
-        const newPorts = [...deployConfig.ports];
-        newPorts[index][field] = value;
+    const envVarList = useMemo(() => {
+        if (deployConfig.envVarList && Array.isArray(deployConfig.envVarList)) {
+            return deployConfig.envVarList;
+        }
+        return Object.entries(deployConfig.env_vars || {}).map(([key, value], index) => ({
+            id: `env-${index}`,
+            key,
+            value
+        }));
+    }, [deployConfig.envVarList, deployConfig.env_vars]);
+
+    const updatePorts = (newList) => {
+        updateConfig('portList', newList);
+        const newPorts = {};
+        newList.forEach(({ exposed, internal }) => {
+            if (exposed && internal) {
+                newPorts[exposed] = internal;
+            }
+        });
         updateConfig('ports', newPorts);
     };
 
-    const removePort = (index) => {
-        if (deployConfig.ports.length > 1) {
-            const newPorts = deployConfig.ports.filter((_, i) => i !== index);
-            updateConfig('ports', newPorts);
-        }
+    const updateEnvVars = (newList) => {
+        updateConfig('envVarList', newList);
+        const newVars = {};
+        newList.forEach(({ key, value }) => {
+            if (key) {
+                newVars[key] = value || '';
+            }
+        });
+        updateConfig('env_vars', newVars);
+    };
+
+    const addPort = () => {
+        const newId = `port-new-${Date.now()}`;
+        const newList = [...portList, { id: newId, exposed: '', internal: '' }];
+        updatePorts(newList);
+    };
+
+    const updatePort = (targetId, field, value) => {
+        const newList = portList.map(port =>
+            port.id === targetId
+                ? { ...port, [field]: value }
+                : port
+        );
+        updatePorts(newList);
+    };
+
+    const removePort = (targetId) => {
+        const newList = portList.filter(port => port.id !== targetId);
+        updatePorts(newList);
     };
 
     const addEnvVar = () => {
-        updateConfig('envVars', [...deployConfig.envVars, { key: '', value: '' }]);
+        const newId = `env-new-${Date.now()}`;
+        const newList = [...envVarList, { id: newId, key: '', value: '' }];
+        updateEnvVars(newList);
     };
 
-    const updateEnvVar = (index, field, value) => {
-        const newEnvVars = [...deployConfig.envVars];
-        newEnvVars[index][field] = value;
-        updateConfig('envVars', newEnvVars);
+    const updateEnvVar = (targetId, field, value) => {
+        const newList = envVarList.map(envVar =>
+            envVar.id === targetId
+                ? { ...envVar, [field]: value }
+                : envVar
+        );
+        updateEnvVars(newList);
     };
 
-    const removeEnvVar = (index) => {
-        if (deployConfig.envVars.length > 1) {
-            const newEnvVars = deployConfig.envVars.filter((_, i) => i !== index);
-            updateConfig('envVars', newEnvVars);
-        }
+    const removeEnvVar = (targetId) => {
+        const newList = envVarList.filter(envVar => envVar.id !== targetId);
+        updateEnvVars(newList);
     };
 
     return (
         <Box sx={{ mt: 2, mb: 4 }}>
-            {/* Port Configuration */}
+            <Alert severity="info" sx={{ mb: 4, bgcolor: colors.paper, color: colors.text }}>
+                La configuration par défaut est prête à l'emploi. Modifiez les ports ou les variables <strong>uniquement si vous savez ce que vous faites</strong>.
+            </Alert>
+
+            {/* Port Mapping */}
             <Box mb={4}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="body2" fontWeight="medium" sx={{ color: colors.textSecondary }}>
@@ -66,72 +113,35 @@ const AdvancedConfiguration = ({ deployConfig, updateConfig }) => {
                         size="small"
                         onClick={addPort}
                         sx={{
-                            borderColor: colors.border,
-                            color: colors.text,
-                            '&:hover': {
-                                borderColor: colors.inputBorderHover,
-                                bgcolor: colors.inputBg
-                            }
+                            borderColor: colors.border, color: colors.text,
+                            '&:hover': { borderColor: colors.inputBorderHover, bgcolor: colors.inputBg }
                         }}
                     >
                         Ajouter un Port
                     </Button>
                 </Box>
                 <Stack spacing={2}>
-                    {deployConfig.ports.map((port, index) => (
-                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    {portList.map((port) => (
+                        <Box key={port.id} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <TextField
+                                type="number"
                                 value={port.exposed}
-                                onChange={(e) => updatePort(index, 'exposed', e.target.value)}
+                                onChange={(e) => updatePort(port.id, 'exposed', e.target.value)}
                                 placeholder="Port exposé"
-                                variant="outlined"
                                 size="small"
-                                sx={{
-                                    flex: 1,
-                                    '& .MuiOutlinedInput-root': {
-                                        bgcolor: colors.inputBg,
-                                        '& fieldset': {
-                                            borderColor: colors.inputBorder,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: colors.inputBorderHover,
-                                        },
-                                        '& input': {
-                                            color: colors.text,
-                                        }
-                                    }
-                                }}
+                                sx={inputStyle(colors)}
                             />
                             <ArrowForwardIcon sx={{ color: colors.textMuted }} />
                             <TextField
+                                type="number"
                                 value={port.internal}
-                                onChange={(e) => updatePort(index, 'internal', e.target.value)}
+                                onChange={(e) => updatePort(port.id, 'internal', e.target.value)}
                                 placeholder="Port conteneur"
-                                variant="outlined"
                                 size="small"
-                                sx={{
-                                    flex: 1,
-                                    '& .MuiOutlinedInput-root': {
-                                        bgcolor: colors.inputBg,
-                                        '& fieldset': {
-                                            borderColor: colors.inputBorder,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: colors.inputBorderHover,
-                                        },
-                                        '& input': {
-                                            color: colors.text,
-                                        }
-                                    }
-                                }}
+                                sx={inputStyle(colors)}
                             />
-                            {deployConfig.ports.length > 1 && (
-                                <IconButton
-                                    color="error"
-                                    onClick={() => removePort(index)}
-                                    size="small"
-                                    sx={{ color: '#f44336' }}
-                                >
+                            {portList.length > 1 && (
+                                <IconButton color="error" onClick={() => removePort(port.id)} size="small">
                                     <RemoveIcon />
                                 </IconButton>
                             )}
@@ -152,72 +162,33 @@ const AdvancedConfiguration = ({ deployConfig, updateConfig }) => {
                         size="small"
                         onClick={addEnvVar}
                         sx={{
-                            borderColor: colors.border,
-                            color: colors.text,
-                            '&:hover': {
-                                borderColor: colors.inputBorderHover,
-                                bgcolor: colors.inputBg
-                            }
+                            borderColor: colors.border, color: colors.text,
+                            '&:hover': { borderColor: colors.inputBorderHover, bgcolor: colors.inputBg }
                         }}
                     >
                         Ajouter une Variable
                     </Button>
                 </Box>
                 <Stack spacing={2}>
-                    {deployConfig.envVars.map((envVar, index) => (
-                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    {envVarList.map((envVar) => (
+                        <Box key={envVar.id} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <TextField
                                 value={envVar.key}
-                                onChange={(e) => updateEnvVar(index, 'key', e.target.value)}
-                                placeholder="Nom de la variable"
-                                variant="outlined"
+                                onChange={(e) => updateEnvVar(envVar.id, 'key', e.target.value)}
+                                placeholder="Nom"
                                 size="small"
-                                sx={{
-                                    flex: 1,
-                                    '& .MuiOutlinedInput-root': {
-                                        bgcolor: colors.inputBg,
-                                        '& fieldset': {
-                                            borderColor: colors.inputBorder,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: colors.inputBorderHover,
-                                        },
-                                        '& input': {
-                                            color: colors.text,
-                                        }
-                                    }
-                                }}
+                                sx={inputStyle(colors)}
                             />
-                            <Typography variant="body1" sx={{ color: colors.textSecondary }}>=</Typography>
+                            <Typography>=</Typography>
                             <TextField
                                 value={envVar.value}
-                                onChange={(e) => updateEnvVar(index, 'value', e.target.value)}
+                                onChange={(e) => updateEnvVar(envVar.id, 'value', e.target.value)}
                                 placeholder="Valeur"
-                                variant="outlined"
                                 size="small"
-                                sx={{
-                                    flex: 1,
-                                    '& .MuiOutlinedInput-root': {
-                                        bgcolor: colors.inputBg,
-                                        '& fieldset': {
-                                            borderColor: colors.inputBorder,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: colors.inputBorderHover,
-                                        },
-                                        '& input': {
-                                            color: colors.text,
-                                        }
-                                    }
-                                }}
+                                sx={inputStyle(colors)}
                             />
-                            {deployConfig.envVars.length > 1 && (
-                                <IconButton
-                                    color="error"
-                                    onClick={() => removeEnvVar(index)}
-                                    size="small"
-                                    sx={{ color: '#f44336' }}
-                                >
+                            {envVarList.length > 1 && (
+                                <IconButton color="error" onClick={() => removeEnvVar(envVar.id)} size="small">
                                     <RemoveIcon />
                                 </IconButton>
                             )}
@@ -228,5 +199,15 @@ const AdvancedConfiguration = ({ deployConfig, updateConfig }) => {
         </Box>
     );
 };
+
+const inputStyle = (colors) => ({
+    flex: 1,
+    '& .MuiOutlinedInput-root': {
+        bgcolor: colors.inputBg,
+        '& fieldset': { borderColor: colors.inputBorder },
+        '&:hover fieldset': { borderColor: colors.inputBorderHover },
+        '& input': { color: colors.text },
+    }
+});
 
 export default AdvancedConfiguration;
