@@ -1,7 +1,7 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Box, Container, Paper } from '@mui/material';
+import { Box, Container, Paper, CircularProgress } from '@mui/material';
 import MainLayout from '@/layouts/MainLayout';
 import { useTheme } from '@/context/ThemeProvider';
 
@@ -115,10 +115,30 @@ function DeployFlowContent() {
     );
 }
 
+// Composant de fallback pour le loading
+function DeployFlowFallback() {
+    const { colors } = useTheme();
+
+    return (
+        <Box sx={{
+            minHeight: '100vh',
+            background: colors.background,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+        }}>
+            <CircularProgress />
+        </Box>
+    );
+}
+
+// Composant principal avec Suspense
 export default function DeployFlow() {
     return (
         <MainLayout>
-            <DeployFlowContent />
+            <Suspense fallback={<DeployFlowFallback />}>
+                <DeployFlowContent />
+            </Suspense>
         </MainLayout>
     );
 }
