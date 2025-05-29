@@ -28,6 +28,11 @@ function DeployFlowContent() {
     const [availableServices, setAvailableServices] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const handleFinish = () => {
+        localStorage.setItem('deployConfig', JSON.stringify(deployConfig));
+        router.push('/deploy/apply');
+    };
+
     useEffect(() => {
         getCatalog()
             .then(async (services) => {
@@ -108,7 +113,9 @@ function DeployFlowContent() {
                         totalSteps={steps.length}
                         onPrev={handlePrev}
                         onNext={handleNext}
+                        onFinish={handleFinish}
                     />
+
                 </Paper>
             </Container>
         </Box>

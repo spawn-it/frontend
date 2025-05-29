@@ -3,8 +3,7 @@ import React from 'react';
 import { Box, Button } from '@mui/material';
 import { useTheme } from '@/context/ThemeProvider';
 
-const NavigationButtons = ({ currentStep, totalSteps, onPrev, onNext }) => {
-    const { colors } = useTheme();
+const NavigationButtons = ({ currentStep, totalSteps, onPrev, onNext, onFinish }) => {    const { colors } = useTheme();
     const isLastStep = currentStep === totalSteps - 1;
     const isFirstStep = currentStep === 0;
 
@@ -33,7 +32,7 @@ const NavigationButtons = ({ currentStep, totalSteps, onPrev, onNext }) => {
 
             <Button
                 variant="contained"
-                onClick={onNext}
+                onClick={isLastStep ? onFinish : onNext}
                 sx={{
                     px: 4,
                     bgcolor: isLastStep ? '#4caf50' : '#1976d2',
@@ -45,6 +44,7 @@ const NavigationButtons = ({ currentStep, totalSteps, onPrev, onNext }) => {
             >
                 {isLastStep ? 'Déployer le Service' : 'Suivant'}
             </Button>
+
         </Box>
     );
 };

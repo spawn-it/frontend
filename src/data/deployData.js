@@ -2,7 +2,7 @@
 
 export const infrastructureProviders = [
     {
-        id: 'docker',
+        id: 'local',
         name: 'Docker (Local)',
         description: 'Déployer sur des conteneurs Docker',
         icon: '🐳',

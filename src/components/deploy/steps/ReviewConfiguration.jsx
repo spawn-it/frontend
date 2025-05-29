@@ -14,7 +14,6 @@ const ReviewConfiguration = ({ deployConfig, services, providers }) => {
 
     const portEntries = Object.entries(deployConfig.ports || {});
     const envVarEntries = Object.entries(deployConfig.env_vars || {});
-
     return (
         <Box>
             <Typography variant="h5" fontWeight="bold" sx={{ mb: 4, color: colors.text }}>
@@ -22,6 +21,22 @@ const ReviewConfiguration = ({ deployConfig, services, providers }) => {
             </Typography>
             <Box sx={{ maxWidth: 600 }}>
                 <Stack spacing={3} divider={<Divider sx={{ borderColor: colors.border }} />}>
+                    <Box>
+                        <Typography variant="overline" sx={{ color: colors.textSecondary }}>
+                            Nom du Conteneur
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                            {deployConfig.container_name ? (
+                                <Typography variant="body1" fontWeight="medium" sx={{ color: colors.text }}>
+                                    {deployConfig.container_name}
+                                </Typography>
+                            ) : (
+                                <Typography variant="body1" sx={{ color: colors.textSecondary }}>
+                                    Non défini
+                                </Typography>
+                            )}
+                        </Box>
+                    </Box>
 
                     <Box>
                         <Typography variant="overline" sx={{ color: colors.textSecondary }}>

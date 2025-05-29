@@ -1,4 +1,5 @@
 
+'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { alpha } from '@mui/material';
 
@@ -16,7 +17,6 @@ export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Charger la préférence après le montage côté client
   useEffect(() => {
     setMounted(true);
 

@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import { Box } from '@mui/material';
-import { useTheme } from '@/context/ThemeProvider';
 import ScrollableSection from '@/components/common/ScrollableSection';
 import ProviderCard from '../ProviderCard';
 import { infrastructureProviders } from '@/data/deployData';

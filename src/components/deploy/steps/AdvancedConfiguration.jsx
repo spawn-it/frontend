@@ -33,6 +33,10 @@ const AdvancedConfiguration = ({ deployConfig, updateConfig }) => {
         }));
     }, [deployConfig.envVarList, deployConfig.env_vars]);
 
+    const updateContainerName = (value) => {
+        updateConfig('container_name', value);
+    };    
+
     const updatePorts = (newList) => {
         updateConfig('portList', newList);
         const newPorts = {};
@@ -97,6 +101,20 @@ const AdvancedConfiguration = ({ deployConfig, updateConfig }) => {
 
     return (
         <Box sx={{ mt: 2, mb: 4 }}>
+            <Box mb={4}>
+                <Typography variant="body2" fontWeight="medium" sx={{ color: colors.textSecondary, mb: 1 }}>
+                    Nom du service
+                </Typography>
+                <TextField
+                    fullWidth
+                    placeholder="Nom"
+                    value={deployConfig.container_name || ''}
+                    onChange={(e) => updateContainerName(e.target.value)}
+                    size="small"
+                    sx={inputStyle(colors)}
+                />
+            </Box>
+
             <Alert severity="info" sx={{ mb: 4, bgcolor: colors.paper, color: colors.text }}>
                 La configuration par défaut est prête à l'emploi. Modifiez les ports ou les variables <strong>uniquement si vous savez ce que vous faites</strong>.
             </Alert>

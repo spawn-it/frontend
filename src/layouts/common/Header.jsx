@@ -1,5 +1,7 @@
 'use client';
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
     AppBar,
     Box,
@@ -9,34 +11,120 @@ import {
     Container,
     Toolbar,
     Switch,
-    Stack, Link
+    Stack,
+    Menu,
+    MenuItem,
+    Typography
 } from '@mui/material';
 import {
     LightMode as LightModeIcon,
-    DarkMode as DarkModeIcon
+    DarkMode as DarkModeIcon,
+    Logout as LogoutIcon,
+    Person as PersonIcon
 } from '@mui/icons-material';
+import { useKeycloak } from '@react-keycloak/web';
 import { useTheme } from '@/context/ThemeProvider';
 
-const AvatarSingedIn = () => (
-    <Badge
-        overlap="circular"
-        anchorOrigin={{ vertical:'bottom', horizontal:'right' }}
-        badgeContent={<Box sx={{ bgcolor:'#4caf50', width:10, height:10, borderRadius:'50%', border:'2px solid white' }}/>}
-    >
-        <Avatar sx={{
-            background: 'linear-gradient(135deg, #2196f3 0%, #9c27b0 100%)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-        }}>
-            A
-        </Avatar>
-    </Badge>
-);
+const AvatarSignedIn = ({ user, onLogout, onProfile, colors }) => {
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
 
-const AvatarSignedOut = ({ isDarkMode }) => (
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleProfile = () => {
+        handleClose();
+        onProfile();
+    };
+
+    const handleLogout = () => {
+        handleClose();
+        onLogout();
+    };
+
+    const getInitials = (name) => {
+        if (!name) return 'U';
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    };
+
+    return (
+        <>
+            <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                badgeContent={
+                    <Box sx={{ 
+                        bgcolor: '#4caf50', 
+                        width: 10, 
+                        height: 10, 
+                        borderRadius: '50%', 
+                        border: '2px solid white' 
+                    }} />
+                }
+            >
+                <Avatar
+                    onClick={handleClick}
+                    sx={{
+                        background: 'linear-gradient(135deg, #2196f3 0%, #9c27b0 100%)',
+                        cursor: 'pointer',
+                    }}
+                >
+                    {getInitials(user?.name || user?.preferred_username)}
+                </Avatar>
+            </Badge>
+            
+            <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                PaperProps={{
+                    sx: {
+                        bgcolor: colors.paper,
+                        border: `1px solid ${colors.border}`,
+                        mt: 1,
+                        backdropFilter: 'blur(10px)'
+                    }
+                }}
+            >
+                <MenuItem onClick={handleProfile} sx={{ 
+                    '&:hover': { bgcolor: colors.inputBg },
+                    color: colors.text
+                }}>
+                    <PersonIcon sx={{ mr: 1, color: colors.textSecondary }} />
+                    <Box>
+                        <Typography variant="body2" fontWeight="bold" sx={{ color: colors.text }}>
+                            {user?.name || user?.preferred_username}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: colors.textSecondary }}>
+                            {user?.email}
+                        </Typography>
+                    </Box>
+                </MenuItem>
+                <MenuItem onClick={handleLogout} sx={{ 
+                    '&:hover': { bgcolor: colors.inputBg },
+                    color: colors.text
+                }}>
+                    <LogoutIcon sx={{ mr: 1, color: colors.textSecondary }} />
+                    Se déconnecter
+                </MenuItem>
+            </Menu>
+        </>
+    );
+};
+
+const AvatarSignedOut = ({ isDarkMode, onLogin }) => (
     <Button
         variant="contained"
         color="primary"
         disableElevation
+        onClick={onLogin}
         sx={{
             background: isDarkMode
                 ? 'linear-gradient(135deg, #2196f3 0%, #9c27b0 100%)'
@@ -50,12 +138,64 @@ const AvatarSignedOut = ({ isDarkMode }) => (
             }
         }}
     >
-        Sign In
+        Se connecter
     </Button>
 );
 
-const Header = ({ signedIn = false, menuItems }) => {
+const Header = ({ menuItems }) => {
     const { colors, isDarkMode, toggleDarkMode, mounted } = useTheme();
+    const { keycloak, initialized } = useKeycloak();
+    const router = useRouter();
+
+    const handleLogin = () => {
+        keycloak?.login();
+    };
+
+    const handleLogout = () => {
+        keycloak?.logout()
+    };
+
+    const handleProfile = () => {
+        const userId = keycloak?.tokenParsed?.sub || keycloak?.tokenParsed?.preferred_username;
+        if (userId) {
+            router.push(`/dashboard/${userId}`);
+        }
+    };
+
+    if (!initialized) {
+        return (
+            <AppBar
+                position="fixed"
+                elevation={0}
+                sx={{
+                    backgroundColor: colors.navbar,
+                    backdropFilter: 'blur(8px)',
+                    borderBottom: `1px solid ${colors.navbarBorder}`,
+                    transition: 'all 0.3s ease'
+                }}
+            >
+                <Container maxWidth="lg">
+                    <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box
+                                component="img"
+                                sx={{
+                                    width: 150,
+                                    borderRadius: 1,
+                                }}
+                                src="/logo.svg"
+                                alt="SpawnIt Logo"
+                            />
+                        </Box>
+                        <Box>Chargement...</Box>
+                    </Toolbar>
+                </Container>
+            </AppBar>
+        );
+    }
+
+    const isAuthenticated = keycloak?.authenticated;
+    const user = keycloak?.tokenParsed;
 
     return (
         <AppBar
@@ -70,18 +210,19 @@ const Header = ({ signedIn = false, menuItems }) => {
         >
             <Container maxWidth="lg">
                 <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
+                    {/* Logo */}
                     <Link href="/" passHref>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Box
-                                component="img"
-                                sx={{
-                                    width: 150,
-                                    borderRadius: 1,
-                                }}
-                                src="/logo.svg"
-                                alt="SpawnIt Logo"
-                            />
-                        </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                            component="img"
+                            sx={{
+                                width: 150,
+                                borderRadius: 1,
+                            }}
+                            src="/logo.svg"
+                            alt="SpawnIt Logo"
+                        />
+                    </Box>
                     </Link>
 
                     {/* Navigation + Actions */}
@@ -110,7 +251,6 @@ const Header = ({ signedIn = false, menuItems }) => {
                         {/* Theme Toggle */}
                         <Stack direction="row" spacing={1} alignItems="center">
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                {/* Prevent hydration mismatch by showing consistent initial state */}
                                 {mounted ? (
                                     <>
                                         <LightModeIcon sx={{ color: colors.textMuted, fontSize: 18 }} />
@@ -124,19 +264,21 @@ const Header = ({ signedIn = false, menuItems }) => {
                                                 },
                                                 '& .MuiSwitch-thumb': {
                                                     backgroundColor: '#fff',
+                                                },
+                                                '& .MuiSwitch-switchBase.Mui-checked': {
+                                                    color: '#fff',
                                                 }
                                             }}
                                         />
                                         <DarkModeIcon sx={{ color: colors.textMuted, fontSize: 18 }} />
                                     </>
                                 ) : (
-                                    // Placeholder during SSR with consistent dimensions
                                     <Box sx={{
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: 0.5,
-                                        width: '80px', // Approximate width of the theme toggle
-                                        height: '32px' // Approximate height
+                                        width: '80px',
+                                        height: '32px'
                                     }}>
                                         <LightModeIcon sx={{ color: '#999999', fontSize: 18 }} />
                                         <Switch
@@ -157,8 +299,20 @@ const Header = ({ signedIn = false, menuItems }) => {
                                 )}
                             </Box>
 
-                            {/* Sign In Button */}
-                            {signedIn ? <AvatarSingedIn /> : <AvatarSignedOut isDarkMode={isDarkMode} />}
+                            {/* Authentication Button/Avatar */}
+                            {isAuthenticated ? (
+                                <AvatarSignedIn 
+                                    user={user} 
+                                    onLogout={handleLogout} 
+                                    onProfile={handleProfile}
+                                    colors={colors}
+                                />
+                            ) : (
+                                <AvatarSignedOut 
+                                    isDarkMode={isDarkMode} 
+                                    onLogin={handleLogin} 
+                                />
+                            )}
                         </Stack>
                     </Box>
                 </Toolbar>
