@@ -126,7 +126,7 @@ function ApplyPageContent() {
               console.log(`Tentative ${attempts + 1}: Réseau compliant = ${currentStatus.compliant}`);
               setProgressMsg(`Vérification du réseau... (${attempts + 1}/${maxAttempts})`);
               
-              // CORRECTION: Vérifier aussi si l'output contient "No changes"
+              // Vérifier aussi si l'output contient "No changes"
               if (currentStatus.compliant || 
                   (currentStatus.output && currentStatus.output.includes('No changes'))) {
                 console.log('Réseau maintenant compliant !');
@@ -147,11 +147,12 @@ function ApplyPageContent() {
         // 4. Maintenant déployer le service
         setProgressMsg('Sauvegarde de la configuration du service...');
         console.log('Sauvegarde config service...');
-        await saveServiceConfig(clientId, service, configWithoutService);
+        const data = await saveServiceConfig(clientId, service, configWithoutService);
+        const serviceId = data.serviceId;
         
         setProgressMsg('Déploiement du service...');
         console.log('Application du service...');
-        const result = await applyService(clientId, service);
+        const result = await applyService(clientId, serviceId);
         
         setResponse(result);
         setStatus('success');
