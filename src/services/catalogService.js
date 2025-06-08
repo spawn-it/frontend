@@ -33,3 +33,18 @@ export function getImagePath(name) {
             return response.json();
         });
 }
+
+export function extractServiceTypes(catalog) {
+    return catalog.flatMap(category =>
+      category.items.map(item => ({
+        id: item.name.toLowerCase(),
+        name: item.label,
+        description: item.description,
+        icon: null, // tu peux enrichir ici
+        color: 'default', // ou en fonction du type
+        image: `/img/${item.image_path}`, // ou URL complète
+        template: item.template_file
+      }))
+    );
+  }
+  

@@ -11,9 +11,9 @@ import ServiceCard from './ServiceCard';
 const ServiceCardList = ({
   services,
   serviceTypes,
-  onToggleStatus,
   onApplyTerraform,
-  onDestroyService
+  onDestroyService,
+  onDeleteService
 }) => {
   const { colors } = useTheme();
 
@@ -24,10 +24,10 @@ const ServiceCardList = ({
           Active Services
         </Typography>
         <Stack direction="row" spacing={1}>
-          <IconButton 
-            size="small" 
-            sx={{ 
-              border: 1, 
+          <IconButton
+            size="small"
+            sx={{
+              border: 1,
               borderColor: colors.border,
               color: colors.textSecondary,
               '&:hover': {
@@ -38,10 +38,10 @@ const ServiceCardList = ({
           >
             <ArrowBackIcon/>
           </IconButton>
-          <IconButton 
-            size="small" 
-            sx={{ 
-              border: 1, 
+          <IconButton
+            size="small"
+            sx={{
+              border: 1,
               borderColor: colors.border,
               color: colors.textSecondary,
               '&:hover': {
@@ -54,15 +54,16 @@ const ServiceCardList = ({
           </IconButton>
         </Stack>
       </Box>
+      
       <Box display="flex" gap={3} flexWrap="wrap">
         {services.map(service => (
           <ServiceCard
             key={service.id}
             service={service}
             serviceTypes={serviceTypes}
-            onToggleStatus={onToggleStatus}
             onApplyTerraform={onApplyTerraform}
             onDestroyService={onDestroyService}
+            onDeleteService={onDeleteService}
           />
         ))}
       </Box>

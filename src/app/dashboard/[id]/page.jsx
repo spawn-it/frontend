@@ -1,89 +1,217 @@
 'use client';
-import React from 'react';
-import { Box, Container, Paper, Typography, Chip } from '@mui/material';
-import { useKeycloak } from '@react-keycloak/web';
-import { useParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { Container, Box, CircularProgress, Backdrop, Typography } from '@mui/material';
 import MainLayout from '../../../layouts/MainLayout';
-import { useTheme } from '@/context/ThemeProvider';
-import { useRouter } from 'next/navigation';
+import {
+  PlayArrow as PlayArrowIcon,
+  Check as CheckIcon,
+  Warning as WarningIcon,
+  Settings as SettingsIcon,
+} from '@mui/icons-material';
 
-function DashboardContent() {
+import StatsCardList from '@/components/dashboard/StatsCardList';
+import SearchAndFilters from '@/components/dashboard/SearchAndFilters';
+import ServiceCardList from '@/components/dashboard/ServiceCardList';
+import { useTheme } from '@/context/ThemeProvider';
+import { useKeycloak } from '@react-keycloak/web';
+import { getClientServices } from '@/services/clientService';
+import { applyService, destroyService as apiDestroyService, deleteService } from '@/services/deployService';
+import { getCatalog, extractServiceTypes } from '@/services/catalogService';
+
+function useHasMounted() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  return mounted;
+}
+
+function transformServices(rawData) {
+  const servicesObj = rawData.services || {};
+
+  return Object.entries(servicesObj)
+    .filter(([_, svc]) => svc && typeof svc === 'object')
+    .map(([id, svc]) => {
+      const statusData = typeof svc.status === 'object' ? svc.status : {};
+      const lastAction = svc.lastAction?.action || svc.lastAction || 'unknown';
+      const lastUpdate = svc.lastAction?.timestamp?.split('T')[0] || 'unknown';
+      const isCompliant = lastAction === 'apply' && statusData.applied === true;
+      const terraformState = isCompliant ? 'compliant' : 'drifted';
+      const isError = statusData.errorMessage !== null && statusData.errorMessage !== undefined;
+
+      return {
+        id,
+        name: svc.serviceName,
+        type: svc.serviceType?.toLowerCase() || 'unknown',
+        terraformState,
+        lastAction,
+        lastUpdate,
+        status: isError ? 'error' : 'stopped', // Plus de 'running'
+        region: 'unknown',
+        created: '2025-01-01',
+      };
+    });
+}
+
+function DashboardPage() {
+  const hasMounted = useHasMounted();
   const { colors } = useTheme();
   const { keycloak } = useKeycloak();
   const router = useRouter();
   const params = useParams();
   const userId = params.id;
 
-  const hasAccess = () => {
-    if (!keycloak.tokenParsed) return false;
-    
-    const tokenUserId = keycloak.tokenParsed.sub || keycloak.tokenParsed.preferred_username;
-    if (tokenUserId === userId) return true;
-    
-    return false;
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [services, setServices] = useState([]);
+  const [serviceTypes, setServiceTypes] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState('all');
+
+  useEffect(() => {
+    if (!hasMounted) return;
+
+    if (keycloak && !keycloak.authenticated) {
+      router.push('/');
+      return;
+    }
+
+    if (keycloak?.authenticated && userId) {
+      const tokenUserId = keycloak.tokenParsed?.sub;
+      setIsAuthorized(tokenUserId === userId);
+      setCheckingAccess(false);
+    }
+  }, [hasMounted, keycloak, userId]);
+
+  useEffect(() => {
+    if (!isAuthorized || !userId) return;
+
+    getClientServices(userId)
+      .then(data => {
+        const transformed = transformServices(data);
+        setServices(transformed);
+      })
+      .catch(console.error);
+
+    getCatalog()
+      .then(catalog => {
+        const types = extractServiceTypes(catalog);
+        setServiceTypes(types);
+      })
+      .catch(console.error);
+  }, [isAuthorized, userId]);
+
+  const toggleServiceStatus = (id) => {
+    setServices(prev =>
+      prev.map(s =>
+        s.id === id
+          ? {
+              ...s,
+              status: s.status === 'running' ? 'stopped' : 'running',
+              machineStatus: s.status === 'running' ? 'offline' : 'online'
+            }
+          : s
+      )
+    );
   };
 
-  if (!hasAccess()) {
-    router.push('/');
+  const applyTerraform = async (id) => {
+    setLoading(true);
+    try {
+      await applyService(userId, id);
+    } catch (err) {
+      console.error(`Erreur lors de l'application de ${id}:`, err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDestroy = async (id) => {
+    setLoading(true);
+    try {
+      await apiDestroyService(userId, id);
+    } catch (err) {
+      console.error(`Erreur lors de la destruction de ${id}:`, err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    setLoading(true);
+    try {
+      await deleteService(userId, id);
+      const data = await getClientServices(userId);
+      const transformed = transformServices(data);
+      setServices(transformed);
+    } catch (err) {
+      console.error(`Erreur lors de la suppression de ${id}:`, err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!hasMounted || checkingAccess) {
+    return (
+      <MainLayout>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+          <CircularProgress />
+        </Box>
+      </MainLayout>
+    );
   }
 
-  return (
-    <Box sx={{
-      minHeight: '100vh',
-      background: colors.background,
-      color: colors.text,
-      transition: 'all 0.3s'
-    }}>
-      <Container maxWidth="lg" sx={{ pt: 4 }}>
-        <Paper
-          elevation={0}
-          sx={{
-            p: 4,
-            borderRadius: 2,
-            border: `1px solid ${colors.border}`,
-            bgcolor: colors.paper,
-            textAlign: 'center'
-          }}
-        >
-          <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
-            Tableau de bord personnel
-          </Typography>
-          
-          <Chip 
-            label={`ID: ${userId}`} 
-            variant="outlined" 
-            sx={{ mb: 3 }}
-          />
-          
-          <Typography variant="h6" sx={{ color: colors.success || '#4caf50', mb: 2 }}>
-            Vous êtes logué !
-          </Typography>
-          
-          {keycloak.tokenParsed && (
-            <Box sx={{ mt: 3, p: 2, bgcolor: colors.background, borderRadius: 1 }}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Utilisateur :</strong> {keycloak.tokenParsed.preferred_username || keycloak.tokenParsed.name}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                <strong>Email :</strong> {keycloak.tokenParsed.email}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8, mt: 1 }}>
-                <strong>Dashboard ID :</strong> {userId}
-              </Typography>
-            </Box>
-          )}
-        </Paper>
-      </Container>
-    </Box>
-  );
-}
+  if (!isAuthorized) return null;
 
-function Dashboard() {
+  const filteredServices = services.filter(s =>
+    s.name?.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    (selectedType === 'all' || s.type === selectedType)
+  );
+
+  const statConfigs = [
+    { id: 'total', label: 'Total Services', icon: <SettingsIcon />, color: 'primary' },
+    { id: 'compliant', label: 'Compliant State', icon: <CheckIcon />, color: 'success' },
+    { id: 'drift', label: 'State Drift', icon: <WarningIcon />, color: 'warning' },
+  ];
+
+  const stats = statConfigs.map(cfg => {
+    let val = 0;
+    switch (cfg.id) {
+      case 'total': val = services.length; break;
+      case 'compliant': val = services.filter(s => s.terraformState === 'compliant').length; break;
+      case 'drift': val = services.filter(s => s.terraformState === 'drifted').length; break;
+      default: break;
+    }
+    return { ...cfg, value: val };
+  });
+
   return (
     <MainLayout>
-      <DashboardContent />
+      <Box sx={{ minHeight: '100vh', background: colors.background, color: colors.text }}>
+        <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+          <StatsCardList stats={stats} colors={colors} />
+          <SearchAndFilters
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            serviceTypes={serviceTypes}
+          />
+          <ServiceCardList
+            services={filteredServices}
+            serviceTypes={serviceTypes}
+            onApplyTerraform={applyTerraform}
+            onDestroyService={handleDestroy}
+            onDeleteService={handleDelete}
+          />
+        </Container>
+        <Backdrop open={loading} sx={{ zIndex: 9999, color: '#fff', flexDirection: 'column' }}>
+          <CircularProgress color="inherit" />
+          <Typography variant="h6" sx={{ mt: 2 }}>Traitement en cours…</Typography>
+        </Backdrop>
+      </Box>
     </MainLayout>
   );
 }
 
-export default Dashboard;
+export default DashboardPage;

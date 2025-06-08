@@ -11,12 +11,20 @@ export function saveServiceConfig(clientId, serviceId, config) {
   });
 }
 
-// CORRIGÉ - Ajout de "/clients/" manquant
 export function applyService(clientId, serviceId) {
   return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}/apply`, {
     method: 'POST',
   }).then(res => {
     if (!res.ok) throw new Error(`Erreur application config: ${res.status}`);
+    return res.json();
+  });
+}
+
+export function destroyService(clientId, serviceId) {
+  return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}/destroy`, {
+    method: 'POST',
+  }).then(res => {
+    if (!res.ok) throw new Error(`Erreur suppression service: ${res.status}`);
     return res.json();
   });
 }
@@ -54,6 +62,15 @@ export function applyNetwork(clientId, provider) {
     body: JSON.stringify({ provider })
   }).then(res => {
     if (!res.ok) throw new Error(`Erreur application réseau: ${res.status}`);
+    return res.json();
+  });
+}
+
+export function deleteService(clientId, serviceId) {
+  return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}`, {
+    method: 'DELETE',
+  }).then(res => {
+    if (!res.ok) throw new Error(`Erreur suppression service: ${res.status}`);
     return res.json();
   });
 }
