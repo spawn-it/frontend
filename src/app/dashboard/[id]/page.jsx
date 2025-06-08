@@ -32,9 +32,9 @@ function transformServices(rawData) {
     .filter(([_, svc]) => svc && typeof svc === 'object')
     .map(([id, svc]) => {
       const statusData = typeof svc.status === 'object' ? svc.status : {};
-      const lastAction = svc.lastAction?.action || svc.lastAction || 'unknown';
-      const lastUpdate = svc.lastAction?.timestamp?.split('T')[0] || 'unknown';
-      const isCompliant = lastAction === 'apply' && statusData.applied === true;
+      const lastAction = svc.lastAction || 'unknown';
+      const lastUpdate = svc.status?.timestamp.split('T')[0] || 'unknown';
+      const isCompliant = lastAction === 'apply' && statusData.applied === true|| lastAction === 'destroy' && statusData.applied === false;
       const terraformState = isCompliant ? 'compliant' : 'drifted';
       const isError = statusData.errorMessage !== null && statusData.errorMessage !== undefined;
 

@@ -60,6 +60,7 @@ const ServiceCardList = ({
           <ServiceCard
             key={service.id}
             service={service}
+            lastAction={service.lastAction}
             serviceTypes={serviceTypes}
             onApplyTerraform={onApplyTerraform}
             onDestroyService={onDestroyService}
