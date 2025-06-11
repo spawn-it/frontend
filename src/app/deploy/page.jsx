@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, Suspense, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Box, Container, Paper, CircularProgress } from '@mui/material';
 import MainLayout from '@/layouts/MainLayout';
@@ -46,6 +46,7 @@ function DeployFlowContent() {
     const [deployConfig, setDeployConfig] = useState({});
     const [availableServices, setAvailableServices] = useState([]);
     const [loading, setLoading] = useState(true);
+    const lastLoadedService = useRef(null);
 
     useEffect(() => {
         const initialize = async () => {
@@ -54,7 +55,9 @@ function DeployFlowContent() {
                 setAvailableServices(services);
 
                 if (encodedConfig) {
-                    setDeployConfig(decodeConfig(encodedConfig));
+                    const config = decodeConfig(encodedConfig);
+                    setDeployConfig(config);
+                    lastLoadedService.current = config.service;
                 } else if (selectedServiceName) {
                     const found = services.flatMap(c => c.items).find(
                         s => s.name.toLowerCase() === selectedServiceName.toLowerCase()
@@ -66,9 +69,11 @@ function DeployFlowContent() {
                                 ...template.instance,
                                 service: found.name
                             });
+                            lastLoadedService.current = found.name;
                         } catch (err) {
                             console.error('Erreur template :', err);
                             setDeployConfig({ service: found.name });
+                            lastLoadedService.current = found.name;
                         }
                     }
                 }
@@ -88,7 +93,12 @@ function DeployFlowContent() {
 
     useEffect(() => {
         const loadServiceTemplate = async () => {
-            if (availableServices.length > 0 && deployConfig.service && !loading) {
+            if (
+                availableServices.length > 0 &&
+                deployConfig.service &&
+                !loading &&
+                deployConfig.service !== lastLoadedService.current // ← Condition clé !
+            ) {
                 const found = availableServices.flatMap(c => c.items).find(
                     s => s.name.toLowerCase() === deployConfig.service.toLowerCase()
                 );
@@ -99,8 +109,10 @@ function DeployFlowContent() {
                         setDeployConfig(prev => ({
                             ...template.instance,
                             service: found.name,
+                            // Préserver les configurations importantes
                             provider: prev.provider
                         }));
+                        lastLoadedService.current = found.name; // Mettre à jour la référence
                     } catch (err) {
                         console.error('Erreur lors du chargement du template:', err);
                     }
