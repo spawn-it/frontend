@@ -4,7 +4,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { Container, Box, CircularProgress, Backdrop, Typography } from '@mui/material';
 import MainLayout from '../../../layouts/MainLayout';
 import {
-  PlayArrow as PlayArrowIcon,
   Check as CheckIcon,
   Warning as WarningIcon,
   Settings as SettingsIcon,
@@ -55,7 +54,7 @@ function transformServices(rawData) {
 function DashboardPage() {
   const hasMounted = useHasMounted();
   const { colors } = useTheme();
-  const { keycloak } = useKeycloak();
+  const { keycloak, initialized } = useKeycloak();
   const router = useRouter();
   const params = useParams();
   const userId = params.id;
@@ -69,19 +68,20 @@ function DashboardPage() {
   const [selectedType, setSelectedType] = useState('all');
 
   useEffect(() => {
-    if (!hasMounted) return;
+    if (!hasMounted || !initialized) return;
 
-    if (keycloak && !keycloak.authenticated) {
+    if (!keycloak?.authenticated) {
       router.push('/');
       return;
     }
 
-    if (keycloak?.authenticated && userId) {
+    if (keycloak.authenticated && userId) {
       const tokenUserId = keycloak.tokenParsed?.sub;
       setIsAuthorized(tokenUserId === userId);
       setCheckingAccess(false);
     }
-  }, [hasMounted, keycloak, userId]);
+  }, [hasMounted, initialized, keycloak, userId]);
+
 
   useEffect(() => {
     if (!isAuthorized || !userId) return;
@@ -100,20 +100,6 @@ function DashboardPage() {
       })
       .catch(console.error);
   }, [isAuthorized, userId]);
-
-  const toggleServiceStatus = (id) => {
-    setServices(prev =>
-      prev.map(s =>
-        s.id === id
-          ? {
-              ...s,
-              status: s.status === 'running' ? 'stopped' : 'running',
-              machineStatus: s.status === 'running' ? 'offline' : 'online'
-            }
-          : s
-      )
-    );
-  };
 
   const applyTerraform = async (id) => {
     setLoading(true);

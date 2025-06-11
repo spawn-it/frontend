@@ -13,7 +13,7 @@ import { useTheme } from '../../context/ThemeProvider';
 
 const ServiceCard = ({
                        service,
-                       lastAction, // optional override – falls back to service.lastAction when undefined
+                       lastAction,
                        serviceTypes,
                        onApplyTerraform,
                        onDestroyService,
@@ -49,7 +49,7 @@ const ServiceCard = ({
           <CardMedia
               component="img"
               height="160"
-              image={cfg.image}
+              image={cfg?.image}
               alt={service.name}
               sx={{
                 opacity: 0.85,
@@ -83,7 +83,7 @@ const ServiceCard = ({
                 {service.name}
               </Typography>
               <Typography variant="body2" sx={{ color: colors.textSecondary }}>
-                {cfg.name}
+                {cfg?.name}
               </Typography>
             </Box>
             <Box textAlign="right">
