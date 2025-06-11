@@ -44,7 +44,7 @@ function transformServices(rawData) {
         terraformState,
         lastAction,
         lastUpdate,
-        status: isError ? 'error' : 'stopped', // Plus de 'running'
+        status: isError ? 'error' : 'stopped',
         region: 'unknown',
         created: '2025-01-01',
       };
@@ -86,20 +86,33 @@ function DashboardPage() {
   useEffect(() => {
     if (!isAuthorized || !userId) return;
 
-    getClientServices(userId)
-      .then(data => {
+    const fetchServices = async () => {
+      try {
+        const data = await getClientServices(userId);
         const transformed = transformServices(data);
         setServices(transformed);
-      })
-      .catch(console.error);
+      } catch (err) {
+        console.error('Erreur lors du fetch des services:', err);
+      }
+    };
+
+    (async () => {
+      await fetchServices();
+    })();
+
 
     getCatalog()
-      .then(catalog => {
-        const types = extractServiceTypes(catalog);
-        setServiceTypes(types);
-      })
-      .catch(console.error);
+        .then(catalog => {
+          const types = extractServiceTypes(catalog);
+          setServiceTypes(types);
+        })
+        .catch(console.error);
+
+    const interval = setInterval(fetchServices, 5000);
+
+    return () => clearInterval(interval);
   }, [isAuthorized, userId]);
+
 
   const applyTerraform = async (id) => {
     setLoading(true);
