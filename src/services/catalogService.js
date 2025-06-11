@@ -40,9 +40,9 @@ export function extractServiceTypes(catalog) {
         id: item.name.toLowerCase(),
         name: item.label,
         description: item.description,
-        icon: null, // tu peux enrichir ici
-        color: 'default', // ou en fonction du type
-        image: `/img/${item.image_path}`, // ou URL complète
+        icon: null,
+        color: 'default',
+        image: `/img/${item.image_path}`,
         template: item.template_file
       }))
     );

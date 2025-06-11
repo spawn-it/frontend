@@ -139,7 +139,33 @@ const ServiceCard = ({
                 {service.lastUpdate}
               </Typography>
             </Grid>
+              <Grid span={{ xs: 6 }}>
+                  <Typography variant="caption" sx={{ color: colors.textMuted }}>
+                      Provider
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: colors.textSecondary }}>
+                      {service.provider}
+                  </Typography>
+              </Grid>
           </Grid>
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid span={{ xs: 6 }}>
+                    <Typography variant="caption" sx={{ color: colors.textMuted }}>
+                        Public IP
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: colors.textSecondary }}>
+                        {service.public_ip}
+                    </Typography>
+                </Grid>
+                <Grid span={{ xs: 6 }}>
+                    <Typography variant="caption" sx={{ color: colors.textMuted }}>
+                        Ports
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: colors.textSecondary }}>
+                        {service.ports}
+                    </Typography>
+                </Grid>
+            </Grid>
         </CardContent>
 
         {(
