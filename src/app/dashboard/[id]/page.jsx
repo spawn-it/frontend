@@ -47,6 +47,7 @@ function transformServices(rawData) {
         status: isError ? 'error' : 'stopped',
         region: 'unknown',
         created: '2025-01-01',
+        provider: svc.provider || 'unknown',
         public_ip: typeof svc.applyOutput === 'object' && svc.applyOutput?.instance_public_ip_or_host || 'unknown',
         ports: Array.isArray(svc?.applyOutput?.all_ports_info)
             ? svc.applyOutput.all_ports_info.map(p => `${p.internal}:${p.external}`).join(', ')
