@@ -215,7 +215,7 @@ function DashboardPage() {
         </Container>
         <Backdrop open={loading} sx={{ zIndex: 9999, color: '#fff', flexDirection: 'column' }}>
           <CircularProgress color="inherit" />
-          <Typography variant="h6" sx={{ mt: 2 }}>Traitement en cours…</Typography>
+          <Typography variant="h6" sx={{ mt: 2 }}>Loading...</Typography>
         </Backdrop>
       </Box>
     </MainLayout>

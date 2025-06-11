@@ -48,6 +48,7 @@ function DeployFlowContent() {
     const [loading, setLoading] = useState(true);
     const lastLoadedService = useRef(null);
 
+    // Effet pour l'initialisation uniquement
     useEffect(() => {
         const initialize = async () => {
             try {
@@ -91,13 +92,51 @@ function DeployFlowContent() {
         initialize();
     }, [selectedServiceName, encodedConfig, stepParam]);
 
+    // Effet séparé pour surveiller les changements de service depuis l'URL
+    useEffect(() => {
+        if (!loading && selectedServiceName && availableServices.length > 0) {
+            // Si le service dans l'URL est différent de celui actuellement chargé
+            if (selectedServiceName.toLowerCase() !== lastLoadedService.current?.toLowerCase()) {
+                const found = availableServices.flatMap(c => c.items).find(
+                    s => s.name.toLowerCase() === selectedServiceName.toLowerCase()
+                );
+
+                if (found) {
+                    const loadNewTemplate = async () => {
+                        try {
+                            const template = await getTemplate(found.template_file);
+                            setDeployConfig(prev => ({
+                                ...template.instance,
+                                service: found.name,
+                                // Préserver le provider s'il était déjà sélectionné
+                                provider: prev.provider
+                            }));
+                            lastLoadedService.current = found.name;
+                        } catch (err) {
+                            console.error('Erreur lors du chargement du template:', err);
+                            setDeployConfig(prev => ({
+                                ...prev,
+                                service: found.name
+                            }));
+                            lastLoadedService.current = found.name;
+                        }
+                    };
+
+                    loadNewTemplate();
+                }
+            }
+        }
+    }, [selectedServiceName, availableServices, loading]);
+
+    // Effet pour charger le template quand le service change dans deployConfig (pas depuis l'URL)
     useEffect(() => {
         const loadServiceTemplate = async () => {
             if (
                 availableServices.length > 0 &&
                 deployConfig.service &&
                 !loading &&
-                deployConfig.service !== lastLoadedService.current // ← Condition clé !
+                deployConfig.service !== lastLoadedService.current &&
+                deployConfig.service.toLowerCase() === selectedServiceName?.toLowerCase() // Éviter conflit avec l'effet précédent
             ) {
                 const found = availableServices.flatMap(c => c.items).find(
                     s => s.name.toLowerCase() === deployConfig.service.toLowerCase()
@@ -109,10 +148,9 @@ function DeployFlowContent() {
                         setDeployConfig(prev => ({
                             ...template.instance,
                             service: found.name,
-                            // Préserver les configurations importantes
                             provider: prev.provider
                         }));
-                        lastLoadedService.current = found.name; // Mettre à jour la référence
+                        lastLoadedService.current = found.name;
                     } catch (err) {
                         console.error('Erreur lors du chargement du template:', err);
                     }
@@ -121,7 +159,7 @@ function DeployFlowContent() {
         };
 
         loadServiceTemplate();
-    }, [deployConfig.service, availableServices, loading]);
+    }, [deployConfig.service, availableServices, loading, selectedServiceName]);
 
     const updateURL = (config, step = currentStep) => {
         const params = new URLSearchParams();
