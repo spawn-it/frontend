@@ -123,7 +123,7 @@ const ServiceCard = ({
           )}
 
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={6}>
+              <Grid span={{ xs: 6 }}>
               <Typography variant="caption" sx={{ color: colors.textMuted }}>
                 Last Action
               </Typography>
@@ -131,7 +131,7 @@ const ServiceCard = ({
                 {currentAction}
               </Typography>
             </Grid>
-            <Grid item xs={6}>
+              <Grid span={{ xs: 6 }}>
               <Typography variant="caption" sx={{ color: colors.textMuted }}>
                 Last Update
               </Typography>

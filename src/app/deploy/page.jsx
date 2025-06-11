@@ -17,31 +17,48 @@ import { steps, infrastructureProviders } from '@/data/deployData';
 import { getCatalog } from '@/services/catalogService';
 import { getTemplate } from '@/services/templateService';
 
+const encodeConfig = (config) => {
+    try {
+        return btoa(JSON.stringify(config));
+    } catch {
+        return '';
+    }
+};
+
+const decodeConfig = (encoded) => {
+    try {
+        return JSON.parse(atob(encoded));
+    } catch {
+        return {};
+    }
+};
+
 function DeployFlowContent() {
     const { colors } = useTheme();
     const router = useRouter();
     const searchParams = useSearchParams();
+
     const selectedServiceName = searchParams.get('service');
+    const encodedConfig = searchParams.get('config');
+    const stepParam = parseInt(searchParams.get('step') || '0', 10);
 
     const [currentStep, setCurrentStep] = useState(0);
     const [deployConfig, setDeployConfig] = useState({});
     const [availableServices, setAvailableServices] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const handleFinish = () => {
-        localStorage.setItem('deployConfig', JSON.stringify(deployConfig));
-        router.push('/deploy/apply');
-    };
-
     useEffect(() => {
-        getCatalog()
-            .then(async (services) => {
+        const initialize = async () => {
+            try {
+                const services = await getCatalog();
                 setAvailableServices(services);
 
-                if (selectedServiceName) {
-                    const found = services.flatMap(category => category.items)
-                        .find(s => s.name.toLowerCase() === selectedServiceName.toLowerCase());
-
+                if (encodedConfig) {
+                    setDeployConfig(decodeConfig(encodedConfig));
+                } else if (selectedServiceName) {
+                    const found = services.flatMap(c => c.items).find(
+                        s => s.name.toLowerCase() === selectedServiceName.toLowerCase()
+                    );
                     if (found) {
                         try {
                             const template = await getTemplate(found.template_file);
@@ -49,33 +66,94 @@ function DeployFlowContent() {
                                 ...template.instance,
                                 service: found.name
                             });
-                        } catch (error) {
-                            console.error('Erreur lors du chargement du template:', error);
+                        } catch (err) {
+                            console.error('Erreur template :', err);
                             setDeployConfig({ service: found.name });
                         }
                     }
                 }
-            })
-            .catch(console.error)
-            .finally(() => setLoading(false));
-    }, [selectedServiceName]);
 
-    const handleNext = () => {
-        if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1);
-    };
+                if (!isNaN(stepParam) && stepParam >= 0 && stepParam < steps.length) {
+                    setCurrentStep(stepParam);
+                }
+            } catch (err) {
+                console.error('Erreur catalogue :', err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const handlePrev = () => {
-        if (currentStep > 0) setCurrentStep(currentStep - 1);
+        initialize();
+    }, [selectedServiceName, encodedConfig, stepParam]);
+
+    useEffect(() => {
+        const loadServiceTemplate = async () => {
+            if (availableServices.length > 0 && deployConfig.service && !loading) {
+                const found = availableServices.flatMap(c => c.items).find(
+                    s => s.name.toLowerCase() === deployConfig.service.toLowerCase()
+                );
+
+                if (found) {
+                    try {
+                        const template = await getTemplate(found.template_file);
+                        setDeployConfig(prev => ({
+                            ...template.instance,
+                            service: found.name,
+                            provider: prev.provider
+                        }));
+                    } catch (err) {
+                        console.error('Erreur lors du chargement du template:', err);
+                    }
+                }
+            }
+        };
+
+        loadServiceTemplate();
+    }, [deployConfig.service, availableServices, loading]);
+
+    const updateURL = (config, step = currentStep) => {
+        const params = new URLSearchParams();
+        if (config.service) params.set('service', config.service);
+        params.set('config', encodeConfig(config));
+        if (step > 0) params.set('step', step.toString());
+        router.replace(`/deploy?${params.toString()}`, { shallow: true });
     };
 
     const updateConfig = (key, value) => {
-        setDeployConfig(prev => ({ ...prev, [key]: value }));
-        if (key === 'service') {
-            router.push(`/deploy?service=${value}`);
+        const newConfig = { ...deployConfig, [key]: value };
+        setDeployConfig(newConfig);
+        updateURL(newConfig);
+    };
+
+    const handleNext = () => {
+        if (currentStep < steps.length - 1) {
+            const newStep = currentStep + 1;
+            setCurrentStep(newStep);
+            updateURL(deployConfig, newStep);
         }
     };
 
+    const handlePrev = () => {
+        if (currentStep > 0) {
+            const newStep = currentStep - 1;
+            setCurrentStep(newStep);
+            updateURL(deployConfig, newStep);
+        }
+    };
+
+    const handleFinish = () => {
+        router.push(`/deploy/apply?config=${encodeConfig(deployConfig)}`);
+    };
+
     const renderStepContent = () => {
+        if (loading) {
+            return (
+                <Box display="flex" justifyContent="center" py={4}>
+                    <CircularProgress />
+                </Box>
+            );
+        }
+
         switch (currentStep) {
             case 0:
                 return <ServiceSelection deployConfig={deployConfig} updateConfig={updateConfig} services={availableServices} />;
@@ -99,7 +177,6 @@ function DeployFlowContent() {
         }}>
             <DeployHeader deployConfig={deployConfig} services={availableServices} />
             <DeploySteps steps={steps} currentStep={currentStep} />
-
             <Container maxWidth="lg" sx={{ mt: 4 }}>
                 <Paper elevation={0} sx={{
                     p: 4,
@@ -114,15 +191,14 @@ function DeployFlowContent() {
                         onPrev={handlePrev}
                         onNext={handleNext}
                         onFinish={handleFinish}
+                        deployConfig={deployConfig}
                     />
-
                 </Paper>
             </Container>
         </Box>
     );
 }
 
-// Composant de fallback pour le loading
 function DeployFlowFallback() {
     const { colors } = useTheme();
 
@@ -139,7 +215,6 @@ function DeployFlowFallback() {
     );
 }
 
-// Composant principal avec Suspense
 export default function DeployFlow() {
     return (
         <MainLayout>

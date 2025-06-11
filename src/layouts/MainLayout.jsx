@@ -1,25 +1,27 @@
 'use client';
 import React from 'react';
-import { Box } from '@mui/material';
-import { useTheme } from '@/context/ThemeProvider';
 import Header from './common/Header';
 import Footer from './common/Footer';
-
+import { useTheme } from '@/context/ThemeProvider';
 
 const MainLayout = ({ menuItems, children }) => {
-  const { colors } = useTheme();
-  
-  return (
-    <Box sx={{
-      backgroundColor: colors.background,
-      minHeight: '100vh',
-      transition: 'background-color 0.3s ease'
-    }}>
-      <Header menuItems={menuItems} />
-      <Box sx={{ pt: 8 }}>{children}</Box>
-      <Footer />
-    </Box>
-  );
+    const { colors } = useTheme();
+
+    const layoutStyle = {
+        backgroundColor: colors.background,
+        minHeight: '100vh',
+        transition: 'background-color 0.3s ease',
+    };
+
+    return (
+        <div style={layoutStyle}>
+            <Header menuItems={menuItems} />
+            <div style={{ paddingTop: '64px' }}>
+                {children}
+            </div>
+            <Footer />
+        </div>
+    );
 };
 
 export default MainLayout;

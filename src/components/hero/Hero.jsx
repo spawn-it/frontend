@@ -20,7 +20,7 @@ export default function Hero() {
           >
             <Container maxWidth="lg">
               <Grid container spacing={3} alignItems="center">
-                <Grid item xs={12} md={7}>
+                  <Grid span={{ xs: 12, md: 7 }}>
                   <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
                     <Typography variant="h2" sx={{ fontWeight: 'bold', mb: 2, textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
                       Spawn Your Services

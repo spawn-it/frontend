@@ -150,15 +150,18 @@ function DashboardPage() {
     }
   };
 
-  if (!hasMounted || checkingAccess) {
+  if (!hasMounted) return null;
+
+  if (checkingAccess) {
     return (
-      <MainLayout>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-          <CircularProgress />
-        </Box>
-      </MainLayout>
+        <MainLayout>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+            <CircularProgress />
+          </Box>
+        </MainLayout>
     );
   }
+
 
   if (!isAuthorized) return null;
 
