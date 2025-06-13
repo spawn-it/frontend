@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import ScrollableSection from '../common/ScrollableSection';
 import Testimonial from './Testimonial';
 import Container from '@mui/material/Container';
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '@/context/ThemeProvider';
 
 export default function TestimonialList({ testimonials }) {
   const { colors } = useTheme();

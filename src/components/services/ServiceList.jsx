@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Container } from '@mui/material';
 import { useTheme } from '@/context/ThemeProvider';
-import ScrollableSection from '../common/ScrollableSection';
-import ServiceImage from './ServiceImage';
+import ScrollableSection from '@/components/common/ScrollableSection';
+import ServiceImage from '@/components/services/ServiceImage';
 
 export default function ServiceList({ categories }) {
   const { colors } = useTheme();

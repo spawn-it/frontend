@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { alpha } from '@mui/material';
 
-const ThemeContext = createContext();
+const ThemeContext = createContext(undefined);
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);

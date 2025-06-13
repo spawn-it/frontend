@@ -20,7 +20,7 @@ import {
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '@/context/ThemeProvider';
 
 const ServiceCard = ({
   service,

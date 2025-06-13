@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Container } from '@mui/material';
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '@/context/ThemeProvider';
 import ScrollableSection from '../common/ScrollableSection';
 import Feature from './Feature';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
