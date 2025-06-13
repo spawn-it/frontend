@@ -1,4 +1,3 @@
-
 'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { alpha } from '@mui/material';
@@ -25,7 +24,9 @@ export const ThemeProvider = ({ children }) => {
       if (saved !== null) {
         setIsDarkMode(JSON.parse(saved));
       } else {
-        setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+        setIsDarkMode(
+          window.matchMedia('(prefers-color-scheme: dark)').matches
+        );
       }
     }
   }, []);
@@ -42,27 +43,39 @@ export const ThemeProvider = ({ children }) => {
     isDarkMode: safeIsDarkMode,
     colors: {
       background: safeIsDarkMode ? '#121212' : '#f5f5f5',
-      paper: safeIsDarkMode ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.9)',
-      paperHover: safeIsDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,1)',
+      paper: safeIsDarkMode
+        ? 'rgba(255,255,255,0.07)'
+        : 'rgba(255,255,255,0.9)',
+      paperHover: safeIsDarkMode
+        ? 'rgba(255,255,255,0.1)'
+        : 'rgba(255,255,255,1)',
       text: safeIsDarkMode ? 'white' : '#1a1a1a',
-      textSecondary: safeIsDarkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+      textSecondary: safeIsDarkMode
+        ? 'rgba(255,255,255,0.7)'
+        : 'rgba(0,0,0,0.7)',
       textMuted: safeIsDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
       border: safeIsDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-      navbar: safeIsDarkMode ? alpha('#0f2027', 0.85) : 'rgba(255,255,255,0.85)',
-      navbarBorder: safeIsDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+      navbar: safeIsDarkMode
+        ? alpha('#0f2027', 0.85)
+        : 'rgba(255,255,255,0.85)',
+      navbarBorder: safeIsDarkMode
+        ? 'rgba(255,255,255,0.1)'
+        : 'rgba(0,0,0,0.1)',
       inputBg: safeIsDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
       inputBorder: safeIsDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)',
-      inputBorderHover: safeIsDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.3)',
+      inputBorderHover: safeIsDarkMode
+        ? 'rgba(255,255,255,0.5)'
+        : 'rgba(0,0,0,0.3)',
       chipBg: safeIsDarkMode ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.9)',
-      shadow: safeIsDarkMode ? '0 16px 30px rgba(0,0,0,0.4)' : '0 16px 30px rgba(0,0,0,0.15)',
+      shadow: safeIsDarkMode
+        ? '0 16px 30px rgba(0,0,0,0.4)'
+        : '0 16px 30px rgba(0,0,0,0.15)',
     },
     toggleDarkMode: () => setIsDarkMode(prev => !prev),
     mounted,
   };
 
   return (
-      <ThemeContext.Provider value={theme}>
-        {children}
-      </ThemeContext.Provider>
+    <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
   );
 };

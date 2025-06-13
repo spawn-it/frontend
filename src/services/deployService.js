@@ -1,75 +1,112 @@
-const apiUrl = `http://localhost:8000/api`;
+const apiUrl = process.env.API_ENDPOINT || 'http://localhost:8000/api';
+
+export function getClientServices(clientId) {
+  return fetch(
+    `${apiUrl}/clients/${encodeURIComponent(clientId)}/services`
+  ).then(response => {
+    if (!response.ok)
+      throw new Error(
+        `Impossible de récupérer les services du client ${clientId}`
+      );
+    return response.json();
+  });
+}
 
 export function saveServiceConfig(clientId, serviceId, config) {
-  return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}/config`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(config),
-  }).then(res => {
+  return fetch(
+    `${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}/config`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    }
+  ).then(res => {
     if (!res.ok) throw new Error(`Erreur sauvegarde config: ${res.status}`);
     return res.json();
   });
 }
 
 export function applyService(clientId, serviceId) {
-  return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}/apply`, {
-    method: 'POST',
-  }).then(res => {
+  return fetch(
+    `${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}/apply`,
+    {
+      method: 'POST',
+    }
+  ).then(res => {
     if (!res.ok) throw new Error(`Erreur application config: ${res.status}`);
     return res.json();
   });
 }
 
 export function destroyService(clientId, serviceId) {
-  return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}/destroy`, {
-    method: 'POST',
-  }).then(res => {
+  return fetch(
+    `${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}/destroy`,
+    {
+      method: 'POST',
+    }
+  ).then(res => {
     if (!res.ok) throw new Error(`Erreur suppression service: ${res.status}`);
     return res.json();
   });
 }
 
 export function checkNetworkConfigExists(clientId, provider) {
-  return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/network/config?provider=${encodeURIComponent(provider)}`).then(res => {
+  return fetch(
+    `${apiUrl}/clients/${encodeURIComponent(clientId)}/network/config?provider=${encodeURIComponent(provider)}`
+  ).then(res => {
     if (res.status === 404) return { exists: false };
-    if (!res.ok) throw new Error(`Erreur vérification config réseau: ${res.status}`);
+    if (!res.ok)
+      throw new Error(`Erreur vérification config réseau: ${res.status}`);
     return res.json();
   });
 }
 
 export function uploadNetworkConfig(clientId, config) {
-  return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/network/config`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(config),
-  }).then(res => {
-    if (!res.ok) throw new Error(`Erreur création config réseau: ${res.status}`);
+  return fetch(
+    `${apiUrl}/clients/${encodeURIComponent(clientId)}/network/config`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    }
+  ).then(res => {
+    if (!res.ok)
+      throw new Error(`Erreur création config réseau: ${res.status}`);
     return res.json();
   });
 }
 
 export function checkNetworkIsCompliant(clientId, provider) {
-  return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/network/status?provider=${encodeURIComponent(provider)}`).then(res => {
-    if (!res.ok) throw new Error(`Erreur vérification statut réseau: ${res.status}`);
+  return fetch(
+    `${apiUrl}/clients/${encodeURIComponent(clientId)}/network/status?provider=${encodeURIComponent(provider)}`
+  ).then(res => {
+    if (!res.ok)
+      throw new Error(`Erreur vérification statut réseau: ${res.status}`);
     return res.json();
   });
 }
 
 export function applyNetwork(clientId, provider) {
-  return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/network/apply`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ provider })
-  }).then(res => {
+  return fetch(
+    `${apiUrl}/clients/${encodeURIComponent(clientId)}/network/apply`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider }),
+    }
+  ).then(res => {
     if (!res.ok) throw new Error(`Erreur application réseau: ${res.status}`);
     return res.json();
   });
 }
 
 export function deleteService(clientId, serviceId) {
-  return fetch(`${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}`, {
-    method: 'DELETE',
-  }).then(res => {
+  return fetch(
+    `${apiUrl}/clients/${encodeURIComponent(clientId)}/${encodeURIComponent(serviceId)}`,
+    {
+      method: 'DELETE',
+    }
+  ).then(res => {
     if (!res.ok) throw new Error(`Erreur suppression service: ${res.status}`);
     return res.json();
   });

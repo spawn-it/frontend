@@ -1,15 +1,9 @@
-'use client';
 import React from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { useTheme } from '../../context/ThemeProvider';
 
-export default function Feature({
-  title,
-  desc,
-  icon,
-  color
-}) {
+export default function Feature({ title, desc, icon, color }) {
   const { colors } = useTheme();
 
   return (
@@ -22,7 +16,7 @@ export default function Feature({
         bgcolor: colors.paper,
         backdropFilter: 'blur(8px)',
         border: `1px solid ${colors.border}`,
-        transition: 'all 0.3s ease'
+        transition: 'all 0.3s ease',
       }}
     >
       <Box
@@ -37,31 +31,31 @@ export default function Feature({
           alignItems: 'center',
           justifyContent: 'center',
           border: `1px solid ${alpha(color, 0.3)}`,
-          transition: 'all 0.3s ease'
+          transition: 'all 0.3s ease',
         }}
       >
         {icon}
       </Box>
-      <Typography 
-        variant="h6" 
-        sx={{ 
-          fontWeight: 600, 
-          mb: 1, 
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: 600,
+          mb: 1,
           color: colors.text,
-          transition: 'color 0.3s ease'
+          transition: 'color 0.3s ease',
         }}
       >
         {title}
       </Typography>
-      <Typography 
-        variant="body2" 
-        sx={{ 
+      <Typography
+        variant="body2"
+        sx={{
           color: colors.textSecondary,
-          transition: 'color 0.3s ease'
+          transition: 'color 0.3s ease',
         }}
       >
         {desc}
       </Typography>
     </Paper>
   );
-};
+}

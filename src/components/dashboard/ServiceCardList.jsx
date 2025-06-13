@@ -1,11 +1,10 @@
-'use client';
 import React from 'react';
 import { Box, Typography, Stack, IconButton } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
-  ArrowForward as ArrowForwardIcon
+  ArrowForward as ArrowForwardIcon,
 } from '@mui/icons-material';
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '@/context/ThemeProvider';
 import ServiceCard from './ServiceCard';
 
 const ServiceCardList = ({
@@ -13,13 +12,18 @@ const ServiceCardList = ({
   serviceTypes,
   onApplyTerraform,
   onDestroyService,
-  onDeleteService
+  onDeleteService,
 }) => {
   const { colors } = useTheme();
 
   return (
     <Box mb={4}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <Typography variant="h5" fontWeight="bold" sx={{ color: colors.text }}>
           Active Services
         </Typography>
@@ -32,11 +36,11 @@ const ServiceCardList = ({
               color: colors.textSecondary,
               '&:hover': {
                 borderColor: colors.inputBorderHover,
-                bgcolor: colors.inputBg
-              }
+                bgcolor: colors.inputBg,
+              },
             }}
           >
-            <ArrowBackIcon/>
+            <ArrowBackIcon />
           </IconButton>
           <IconButton
             size="small"
@@ -46,15 +50,15 @@ const ServiceCardList = ({
               color: colors.textSecondary,
               '&:hover': {
                 borderColor: colors.inputBorderHover,
-                bgcolor: colors.inputBg
-              }
+                bgcolor: colors.inputBg,
+              },
             }}
           >
-            <ArrowForwardIcon/>
+            <ArrowForwardIcon />
           </IconButton>
         </Stack>
       </Box>
-      
+
       <Box display="flex" gap={3} flexWrap="wrap">
         {services.map(service => (
           <ServiceCard

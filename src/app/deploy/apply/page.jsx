@@ -1,5 +1,11 @@
 'use client';
-import React, { useEffect, useState, useRef, useCallback, Suspense } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  Suspense,
+} from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Box,
@@ -21,7 +27,7 @@ import {
   applyNetwork,
 } from '@/services/deployService';
 
-const decodeConfig = (encodedConfig) => {
+const decodeConfig = encodedConfig => {
   try {
     return JSON.parse(atob(encodedConfig));
   } catch (error) {
@@ -59,13 +65,21 @@ function ApplyPageContent() {
       }
     } else {
       setConfigError(true);
-      setErrorMsg('No configuration found. Please return to the configuration page.');
+      setErrorMsg(
+        'No configuration found. Please return to the configuration page.'
+      );
       setStatus('error');
     }
   }, [searchParams]);
 
   const deploy = useCallback(async () => {
-    if (!keycloak?.authenticated || !clientId || hasDeployed.current || !deployConfig) return;
+    if (
+      !keycloak?.authenticated ||
+      !clientId ||
+      hasDeployed.current ||
+      !deployConfig
+    )
+      return;
     hasDeployed.current = true;
 
     const { service, ...configWithoutService } = deployConfig;
@@ -121,14 +135,22 @@ function ApplyPageContent() {
       }
 
       setProgressMsg('Saving service configuration...');
-      const { serviceId } = await saveServiceConfig(clientId, service, configWithoutService);
+      const { serviceId } = await saveServiceConfig(
+        clientId,
+        service,
+        configWithoutService
+      );
 
-      setProgressMsg('Deployment of the service is in progress. This may take a few minutes.');
+      setProgressMsg(
+        'Deployment of the service is in progress. This may take a few minutes.'
+      );
       const result = await applyService(clientId, serviceId);
 
       setResponse(result);
       setStatus('success');
-      setProgressMsg('Deployment applied successfully. Your service is being deployed. This may take a few minutes.');
+      setProgressMsg(
+        'Deployment applied successfully. Your service is being deployed. This may take a few minutes.'
+      );
     } catch (err) {
       console.error('Error during deployment:', err);
       setErrorMsg(err.message || 'An error occurred during deployment.');
@@ -148,121 +170,142 @@ function ApplyPageContent() {
 
   if (configError) {
     return (
-        <MainLayout>
-          <Container maxWidth="md" sx={{ mt: 6 }}>
-            <Paper sx={{ p: 4, bgcolor: colors.paper, borderRadius: 2 }}>
-              <Typography variant="h5" color="error" gutterBottom>
-                Configuration manquante
-              </Typography>
-              <Typography color="error" sx={{ mb: 3 }}>
-                {errorMsg}
-              </Typography>
-              <Button
-                  variant="contained"
-                  onClick={handleReturnToConfig}
-                  sx={{ mr: 2 }}
-              >
-                Retourner à la configuration
-              </Button>
-            </Paper>
-          </Container>
-        </MainLayout>
+      <MainLayout>
+        <Container maxWidth="md" sx={{ mt: 6 }}>
+          <Paper sx={{ p: 4, bgcolor: colors.paper, borderRadius: 2 }}>
+            <Typography variant="h5" color="error" gutterBottom>
+              Configuration manquante
+            </Typography>
+            <Typography color="error" sx={{ mb: 3 }}>
+              {errorMsg}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={handleReturnToConfig}
+              sx={{ mr: 2 }}
+            >
+              Retourner à la configuration
+            </Button>
+          </Paper>
+        </Container>
+      </MainLayout>
     );
   }
 
   if (!deployConfig) {
     return (
-        <MainLayout>
-          <Container maxWidth="md" sx={{ mt: 6 }}>
-            <Paper sx={{ p: 4, bgcolor: colors.paper, borderRadius: 2 }}>
-              <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                <CircularProgress />
-                <Typography variant="body1" color="textSecondary">
-                  Loading configuration...
-                </Typography>
-              </Box>
-            </Paper>
-          </Container>
-        </MainLayout>
+      <MainLayout>
+        <Container maxWidth="md" sx={{ mt: 6 }}>
+          <Paper sx={{ p: 4, bgcolor: colors.paper, borderRadius: 2 }}>
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap={2}
+            >
+              <CircularProgress />
+              <Typography variant="body1" color="textSecondary">
+                Loading configuration...
+              </Typography>
+            </Box>
+          </Paper>
+        </Container>
+      </MainLayout>
     );
   }
 
   return (
-      <MainLayout>
-        <Container maxWidth="md" sx={{ mt: 6 }}>
-          <Paper sx={{ p: 4, bgcolor: colors.paper, borderRadius: 2 }}>
-            {status === 'loading' && (
-                <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                  <CircularProgress />
-                  <Typography variant="body1" color="textSecondary">
-                    {progressMsg}
-                  </Typography>
+    <MainLayout>
+      <Container maxWidth="md" sx={{ mt: 6 }}>
+        <Paper sx={{ p: 4, bgcolor: colors.paper, borderRadius: 2 }}>
+          {status === 'loading' && (
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap={2}
+            >
+              <CircularProgress />
+              <Typography variant="body1" color="textSecondary">
+                {progressMsg}
+              </Typography>
 
-                  <Box sx={{ mt: 2, textAlign: 'center' }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Service: <strong>{deployConfig.service}</strong>
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Provider: <strong>{deployConfig.provider || 'local'}</strong>
-                    </Typography>
-                  </Box>
-                </Box>
-            )}
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Typography variant="body2" color="textSecondary">
+                  Service: <strong>{deployConfig.service}</strong>
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Provider: <strong>{deployConfig.provider || 'local'}</strong>
+                </Typography>
+              </Box>
+            </Box>
+          )}
 
-            {status === 'success' && (
-                <>
-                  <Typography variant="h5" color="success.main" gutterBottom>
-                    Deployment applied successfully
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Your service is being deployed. This may take a few minutes.
-                  </Typography>
+          {status === 'success' && (
+            <>
+              <Typography variant="h5" color="success.main" gutterBottom>
+                Deployment applied successfully
+              </Typography>
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                Your service is being deployed. This may take a few minutes.
+              </Typography>
 
-                  <Box sx={{ mt: 2, p: 2, bgcolor: 'success.light', borderRadius: 1, mb: 2 }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Configuration:
-                    </Typography>
-                    <Typography variant="body2">
-                      • Service: {deployConfig.service}
-                    </Typography>
-                    <Typography variant="body2">
-                      • Provider: {deployConfig.provider || 'local'}
-                    </Typography>
-                  </Box>
+              <Box
+                sx={{
+                  mt: 2,
+                  p: 2,
+                  bgcolor: 'success.light',
+                  borderRadius: 1,
+                  mb: 2,
+                }}
+              >
+                <Typography variant="subtitle2" gutterBottom>
+                  Configuration:
+                </Typography>
+                <Typography variant="body2">
+                  • Service: {deployConfig.service}
+                </Typography>
+                <Typography variant="body2">
+                  • Provider: {deployConfig.provider || 'local'}
+                </Typography>
+              </Box>
 
-                  <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                    <Typography variant="body2" gutterBottom>
-                      Details of the deployment response:
-                    </Typography>
-                    <pre style={{ fontSize: '12px', overflow: 'auto', whiteSpace: 'pre-wrap' }}>
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                <Typography variant="body2" gutterBottom>
+                  Details of the deployment response:
+                </Typography>
+                <pre
+                  style={{
+                    fontSize: '12px',
+                    overflow: 'auto',
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
                   {JSON.stringify(response, null, 2)}
                 </pre>
-                  </Box>
+              </Box>
 
-                  <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-                    <Button
-                        variant="outlined"
-                        onClick={handleReturnToConfig}
-                    >
-                      New deployment
-                    </Button>
-                  </Box>
-                </>
-            )}
+              <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+                <Button variant="outlined" onClick={handleReturnToConfig}>
+                  New deployment
+                </Button>
+              </Box>
+            </>
+          )}
 
-            {status === 'error' && (
-                <Box>
-                  <Typography variant="h5" color="error" gutterBottom>
-                    Deployment failed
-                  </Typography>
-                  <Typography color="error" sx={{ mb: 2 }}>
-                    {errorMsg}
-                  </Typography>
-                </Box>
-            )}
-          </Paper>
-        </Container>
-      </MainLayout>
+          {status === 'error' && (
+            <Box>
+              <Typography variant="h5" color="error" gutterBottom>
+                Deployment failed
+              </Typography>
+              <Typography color="error" sx={{ mb: 2 }}>
+                {errorMsg}
+              </Typography>
+            </Box>
+          )}
+        </Paper>
+      </Container>
+    </MainLayout>
   );
 }
 
@@ -270,25 +313,30 @@ function ApplyPageFallback() {
   const { colors } = useTheme();
 
   return (
-      <MainLayout>
-        <Container maxWidth="md" sx={{ mt: 6 }}>
-          <Paper sx={{ p: 4, bgcolor: colors?.paper, borderRadius: 2 }}>
-            <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-              <CircularProgress />
-              <Typography variant="body1" color="textSecondary">
-                Loading deployment configuration...
-              </Typography>
-            </Box>
-          </Paper>
-        </Container>
-      </MainLayout>
+    <MainLayout>
+      <Container maxWidth="md" sx={{ mt: 6 }}>
+        <Paper sx={{ p: 4, bgcolor: colors?.paper, borderRadius: 2 }}>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            gap={2}
+          >
+            <CircularProgress />
+            <Typography variant="body1" color="textSecondary">
+              Loading deployment configuration...
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </MainLayout>
   );
 }
 
 export default function ApplyPage() {
   return (
-      <Suspense fallback={<ApplyPageFallback />}>
-        <ApplyPageContent />
-      </Suspense>
+    <Suspense fallback={<ApplyPageFallback />}>
+      <ApplyPageContent />
+    </Suspense>
   );
 }

@@ -1,7 +1,13 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Container, Box, CircularProgress, Backdrop, Typography } from '@mui/material';
+import {
+  Container,
+  Box,
+  CircularProgress,
+  Backdrop,
+  Typography,
+} from '@mui/material';
 import MainLayout from '../../../layouts/MainLayout';
 import {
   Check as CheckIcon,
@@ -14,13 +20,19 @@ import SearchAndFilters from '@/components/dashboard/SearchAndFilters';
 import ServiceCardList from '@/components/dashboard/ServiceCardList';
 import { useTheme } from '@/context/ThemeProvider';
 import { useKeycloak } from '@react-keycloak/web';
-import { getClientServices } from '@/services/clientService';
-import { applyService, destroyService as apiDestroyService, deleteService } from '@/services/deployService';
+import {
+  applyService,
+  getClientServices,
+  destroyService as apiDestroyService,
+  deleteService,
+} from '@/services/deployService';
 import { getCatalog, extractServiceTypes } from '@/services/catalogService';
 
 function useHasMounted() {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   return mounted;
 }
 
@@ -33,9 +45,13 @@ function transformServices(rawData) {
       const statusData = typeof svc.status === 'object' ? svc.status : {};
       const lastAction = svc.lastAction || 'unknown';
       const lastUpdate = svc.status?.timestamp.split('T')[0] || 'unknown';
-      const isCompliant = lastAction === 'apply' && statusData.applied === true || lastAction === 'destroy' && statusData.applied === false;
+      const isCompliant =
+        (lastAction === 'apply' && statusData.applied === true) ||
+        (lastAction === 'destroy' && statusData.applied === false);
       const terraformState = isCompliant ? 'compliant' : 'drifted';
-      const isError = statusData.errorMessage !== null && statusData.errorMessage !== undefined;
+      const isError =
+        statusData.errorMessage !== null &&
+        statusData.errorMessage !== undefined;
 
       return {
         id,
@@ -48,11 +64,15 @@ function transformServices(rawData) {
         region: 'unknown',
         created: '2025-01-01',
         provider: svc.provider || 'unknown',
-        public_ip: typeof svc.applyOutput === 'object' && svc.applyOutput?.instance_public_ip_or_host || 'unknown',
+        public_ip:
+          (typeof svc.applyOutput === 'object' &&
+            svc.applyOutput?.instance_public_ip_or_host) ||
+          'unknown',
         ports: Array.isArray(svc?.applyOutput?.all_ports_info)
-            ? svc.applyOutput.all_ports_info.map(p => `${p.internal}:${p.external}`).join(', ')
-            : 'N/A',
-
+          ? svc.applyOutput.all_ports_info
+              .map(p => `${p.internal}:${p.external}`)
+              .join(', ')
+          : 'N/A',
       };
     });
 }
@@ -88,7 +108,6 @@ function DashboardPage() {
     }
   }, [hasMounted, initialized, keycloak, userId]);
 
-
   useEffect(() => {
     if (!isAuthorized || !userId) return;
 
@@ -106,21 +125,19 @@ function DashboardPage() {
       await fetchServices();
     })();
 
-
     getCatalog()
-        .then(catalog => {
-          const types = extractServiceTypes(catalog);
-          setServiceTypes(types);
-        })
-        .catch(console.error);
+      .then(catalog => {
+        const types = extractServiceTypes(catalog);
+        setServiceTypes(types);
+      })
+      .catch(console.error);
 
     const interval = setInterval(fetchServices, 5000);
 
     return () => clearInterval(interval);
   }, [isAuthorized, userId]);
 
-
-  const applyTerraform = async (id) => {
+  const applyTerraform = async id => {
     setLoading(true);
     try {
       await applyService(userId, id);
@@ -131,7 +148,7 @@ function DashboardPage() {
     }
   };
 
-  const handleDestroy = async (id) => {
+  const handleDestroy = async id => {
     setLoading(true);
     try {
       await apiDestroyService(userId, id);
@@ -142,7 +159,7 @@ function DashboardPage() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     setLoading(true);
     try {
       await deleteService(userId, id);
@@ -160,42 +177,70 @@ function DashboardPage() {
 
   if (checkingAccess) {
     return (
-        <MainLayout>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-            <CircularProgress />
-          </Box>
-        </MainLayout>
+      <MainLayout>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+          <CircularProgress />
+        </Box>
+      </MainLayout>
     );
   }
 
-
   if (!isAuthorized) return null;
 
-  const filteredServices = services.filter(s =>
-    s.name?.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (selectedType === 'all' || s.type === selectedType)
+  const filteredServices = services.filter(
+    s =>
+      s.name?.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (selectedType === 'all' || s.type === selectedType)
   );
 
   const statConfigs = [
-    { id: 'total', label: 'Total Services', icon: <SettingsIcon />, color: 'primary' },
-    { id: 'compliant', label: 'Compliant State', icon: <CheckIcon />, color: 'success' },
-    { id: 'drift', label: 'State Drift', icon: <WarningIcon />, color: 'warning' },
+    {
+      id: 'total',
+      label: 'Total Services',
+      icon: <SettingsIcon />,
+      color: 'primary',
+    },
+    {
+      id: 'compliant',
+      label: 'Compliant State',
+      icon: <CheckIcon />,
+      color: 'success',
+    },
+    {
+      id: 'drift',
+      label: 'State Drift',
+      icon: <WarningIcon />,
+      color: 'warning',
+    },
   ];
 
   const stats = statConfigs.map(cfg => {
     let val = 0;
     switch (cfg.id) {
-      case 'total': val = services.length; break;
-      case 'compliant': val = services.filter(s => s.terraformState === 'compliant').length; break;
-      case 'drift': val = services.filter(s => s.terraformState === 'drifted').length; break;
-      default: break;
+      case 'total':
+        val = services.length;
+        break;
+      case 'compliant':
+        val = services.filter(s => s.terraformState === 'compliant').length;
+        break;
+      case 'drift':
+        val = services.filter(s => s.terraformState === 'drifted').length;
+        break;
+      default:
+        break;
     }
     return { ...cfg, value: val };
   });
 
   return (
     <MainLayout>
-      <Box sx={{ minHeight: '100vh', background: colors.background, color: colors.text }}>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          background: colors.background,
+          color: colors.text,
+        }}
+      >
         <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
           <StatsCardList stats={stats} colors={colors} />
           <SearchAndFilters
@@ -213,9 +258,14 @@ function DashboardPage() {
             onDeleteService={handleDelete}
           />
         </Container>
-        <Backdrop open={loading} sx={{ zIndex: 9999, color: '#fff', flexDirection: 'column' }}>
+        <Backdrop
+          open={loading}
+          sx={{ zIndex: 9999, color: '#fff', flexDirection: 'column' }}
+        >
           <CircularProgress color="inherit" />
-          <Typography variant="h6" sx={{ mt: 2 }}>Loading...</Typography>
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Loading...
+          </Typography>
         </Backdrop>
       </Box>
     </MainLayout>

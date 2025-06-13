@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '@/context/ThemeProvider';
 
 const ScrollableSection = ({
   title,
@@ -12,19 +12,20 @@ const ScrollableSection = ({
   gap = 4,
   containerSx = {},
   scrollContainerSx = {},
-  headerSx = {}
+  headerSx = {},
 }) => {
   const { colors } = useTheme();
   const containerRef = useRef(null);
 
-  const scrollContainer = (direction) => {
+  const scrollContainer = direction => {
     if (containerRef.current) {
-      const scrollAmount = direction === 'left'
-        ? -containerRef.current.offsetWidth * 0.8
-        : containerRef.current.offsetWidth * 0.8;
+      const scrollAmount =
+        direction === 'left'
+          ? -containerRef.current.offsetWidth * 0.8
+          : containerRef.current.offsetWidth * 0.8;
       containerRef.current.scrollBy({
         left: scrollAmount,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }
   };
@@ -38,7 +39,7 @@ const ScrollableSection = ({
             justifyContent: 'space-between',
             alignItems: 'center',
             mb: 2,
-            ...headerSx
+            ...headerSx,
           }}
         >
           <Box>
@@ -46,10 +47,10 @@ const ScrollableSection = ({
               <Typography
                 variant="h5"
                 component="h3"
-                sx={{ 
-                  fontWeight: 'bold', 
+                sx={{
+                  fontWeight: 'bold',
                   color: colors.text,
-                  transition: 'color 0.3s ease'
+                  transition: 'color 0.3s ease',
                 }}
               >
                 {title}
@@ -58,9 +59,9 @@ const ScrollableSection = ({
             {subtitle && (
               <Typography
                 variant="h6"
-                sx={{ 
+                sx={{
                   color: colors.textSecondary,
-                  transition: 'color 0.3s ease'
+                  transition: 'color 0.3s ease',
                 }}
               >
                 {subtitle}
@@ -80,8 +81,8 @@ const ScrollableSection = ({
                   '&:hover': {
                     borderColor: colors.inputBorderHover,
                     bgcolor: colors.inputBg,
-                    color: colors.text
-                  }
+                    color: colors.text,
+                  },
                 }}
               >
                 <ArrowBackIcon />
@@ -97,8 +98,8 @@ const ScrollableSection = ({
                   '&:hover': {
                     borderColor: colors.inputBorderHover,
                     bgcolor: colors.inputBg,
-                    color: colors.text
-                  }
+                    color: colors.text,
+                  },
                 }}
               >
                 <ArrowForwardIcon />
@@ -117,10 +118,10 @@ const ScrollableSection = ({
           p: 1,
           // Masquer la scrollbar
           '&::-webkit-scrollbar': {
-            display: 'none'
+            display: 'none',
           },
           scrollbarWidth: 'none', // Firefox
-          ...scrollContainerSx
+          ...scrollContainerSx,
         }}
       >
         {children}

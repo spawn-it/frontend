@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { ReactKeycloakProvider } from '@react-keycloak/web';
 import Keycloak from 'keycloak-js';
 
@@ -18,12 +18,12 @@ const getKeycloakInstance = () => {
 const eventConfig = {
   onAuthLogout: () => {
     window.location.href = '/';
-  }
+  },
 };
 
 export function AuthProvider({ children }) {
   const keycloak = getKeycloakInstance();
-  
+
   const initOptions = {
     onLoad: 'check-sso',
     pkceMethod: 'S256',

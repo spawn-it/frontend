@@ -1,4 +1,3 @@
-'use client';
 import { Box } from '@mui/material';
 import ScrollableSection from '../common/ScrollableSection';
 import Testimonial from './Testimonial';
@@ -9,12 +8,12 @@ export default function TestimonialList({ testimonials }) {
   const { colors } = useTheme();
 
   return (
-    <Box 
-      sx={{ 
-        py: 10, 
+    <Box
+      sx={{
+        py: 10,
         bgcolor: colors.background,
-        transition: 'background-color 0.3s ease'
-      }} 
+        transition: 'background-color 0.3s ease',
+      }}
       id="testimonials"
     >
       <Container maxWidth="lg">

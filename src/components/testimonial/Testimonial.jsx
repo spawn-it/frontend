@@ -1,11 +1,10 @@
-'use client'
 import { Box } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '@/context/ThemeProvider';
 
-export default function Testimonial({t}) {
+export default function Testimonial({ t }) {
   const { colors } = useTheme();
 
   return (
@@ -27,36 +26,36 @@ export default function Testimonial({t}) {
           alt={t.name}
           width={48}
           height={48}
-          style={{ 
+          style={{
             borderRadius: 24,
             border: `2px solid ${colors.border}`,
-            transition: 'border-color 0.3s ease'
+            transition: 'border-color 0.3s ease',
           }}
         />
         <Box>
-          <Typography 
-            variant="subtitle1" 
-            fontWeight={600} 
+          <Typography
+            variant="subtitle1"
+            fontWeight={600}
             sx={{
               color: colors.text,
-              transition: 'color 0.3s ease'
+              transition: 'color 0.3s ease',
             }}
           >
             {t.name}
           </Typography>
-          <Typography 
-            variant="body2" 
+          <Typography
+            variant="body2"
             sx={{
               color: colors.textSecondary,
-              transition: 'color 0.3s ease'
+              transition: 'color 0.3s ease',
             }}
           >
             {t.role}
           </Typography>
         </Box>
       </Stack>
-      <Typography 
-        variant="body2" 
+      <Typography
+        variant="body2"
         fontStyle="italic"
         sx={{
           color: colors.text,

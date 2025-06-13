@@ -10,39 +10,40 @@ import TestimonialList from '@/components/testimonial/TestimonialList';
 import { getCatalog } from '@/services/catalogService';
 
 const menuItems = [
-    { label: 'Services', href: '#services' },
-    { label: 'Features', href: '#features' },
-    { label: 'Testimonials', href: '#testimonials' }
+  { label: 'Services', href: '#services' },
+  { label: 'Features', href: '#features' },
+  { label: 'Testimonials', href: '#testimonials' },
 ];
 
 const LandingPage = () => {
-    const [services, setServices] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [mounted, setMounted] = useState(false);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
-    useEffect(() => {
-        setMounted(true);
-        getCatalog()
-            .then((data) => setServices(data))
-            .catch((err) => console.error('Erreur :', err))
-            .finally(() => setLoading(false));
-    }, []);
+  useEffect(() => {
+    setMounted(true);
+    getCatalog()
+      .then(data => setServices(data))
+      .catch(err => console.error('Erreur :', err))
+      .finally(() => setLoading(false));
+  }, []);
 
-    if (!mounted) return null;
+  if (!mounted) return null;
 
-    return (
-        <MainLayout menuItems={menuItems}>
-            <Hero />
-            {loading ? (
-                <div className="text-center py-20 text-lg font-medium">Loading services...</div>
-            ) : (
-                <ServiceList categories={services} />
-            )}
-            <FeatureList />
-            <TestimonialList testimonials={testimonials} />
-        </MainLayout>
-    );
+  return (
+    <MainLayout menuItems={menuItems}>
+      <Hero />
+      {loading ? (
+        <div className="text-center py-20 text-lg font-medium">
+          Loading services...
+        </div>
+      ) : (
+        <ServiceList categories={services} />
+      )}
+      <FeatureList />
+      <TestimonialList testimonials={testimonials} />
+    </MainLayout>
+  );
 };
-
 
 export default LandingPage;
