@@ -1,36 +1,154 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SpawnIT - Frontend
+
+**Next.js 15 + React 19 web interface**
+
+> ⚠️ **Academic Project Notice**  
+> This is a 2-3 week academic project developed for the PLM & Web course at HEIG-VD. The codebase is a proof of concept and may undergo significant changes. Some features are minimal implementations for demonstration purposes.
+
+## Overview
+
+The frontend provides a modern web interface for SpawnIT, featuring:
+
+- **Service Dashboard** - View and manage deployed services
+- **Deployment Wizard** - Deploy new services with form-based configuration
+- **Real-time Updates** - Live deployment status via Server-Sent Events
+- **SSO Authentication** - Keycloak integration for secure access
+- **Theme Support** - Light/dark mode toggle
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **UI Library**: React 19
+- **Component Library**: Material-UI (MUI) v7
+- **Authentication**: Keycloak (react-keycloak/web)
+- **Styling**: CSS Modules + Emotion
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- Backend API running on port 3001
+- Keycloak instance configured
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Development
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+# Start development server with Turbopack
+npm run dev
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Production build
+npm run build
 
-## Learn More
+# Start production server
+npm start
 
-To learn more about Next.js, take a look at the following resources:
+# Linting
+npm run lint
+npm run lint:fix
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Code formatting
+npm run format
+npm run format:check
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The application will be available at [http://localhost:3000](http://localhost:3000).
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+frontend/
+├── src/
+│   ├── app/                 # Next.js App Router pages
+│   │   ├── dashboard/       # Service dashboard
+│   │   └── deploy/          # Deployment wizard
+│   ├── components/
+│   │   ├── common/          # Shared components
+│   │   ├── dashboard/       # Dashboard-specific
+│   │   ├── deploy/          # Deployment form components
+│   │   ├── features/        # Feature sections
+│   │   └── services/        # Service cards
+│   ├── context/
+│   │   ├── AuthProvider.jsx # Keycloak authentication
+│   │   └── ThemeProvider.jsx # Theme management
+│   ├── services/            # API clients
+│   │   ├── catalogService.js
+│   │   ├── deployService.js
+│   │   └── templateService.js
+│   └── layouts/             # Layout components
+└── public/                  # Static assets
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Features
+
+### Dashboard
+
+- View all deployed services
+- Real-time status updates
+- Service management actions (plan, apply, destroy)
+- Service health monitoring
+
+### Deployment
+
+- Form-based service configuration
+- Dynamic field validation
+- Template-based deployment
+- Real-time deployment progress
+
+### Authentication
+
+Keycloak integration provides:
+- Secure token management
+
+## Configuration
+
+Key configuration files:
+
+- `next.config.mjs` - Next.js configuration
+- `jsconfig.json` - Path aliases and JS settings
+- `src/app/layout.js` - Root layout with providers
+
+## Known Limitations
+
+- **Error handling**: Basic error messages, needs improvement
+- **Form validation**: Minimal client-side validation
+- **Responsive design**: Primarily desktop-focused
+- **Testing**: No automated tests (time constraint)
+- **Accessibility**: Basic a11y, not fully audited
+- **Loading states**: Could be more polished
+- **Error boundaries**: Not implemented
+
+## Future Improvements
+
+- [ ] Add comprehensive test suite (Jest/RTL)
+- [ ] Add proper error boundaries
+- [ ] Implement better loading states
+- [ ] Add form validation schemas
+- [ ] Implement proper error tracking
+
+## Environment Variables
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_KEYCLOAK_URL=http://localhost:8080
+NEXT_PUBLIC_KEYCLOAK_REALM=spawnit
+NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=spawnit-frontend
+```
+
+## Contributing
+
+This is an academic project. Feel free to fork and improve, but note that the codebase is intentionally minimal for demonstration purposes.
+
+## Authors
+
+- **Massimo Stefani**
+- **Timothée Van Hove**
+
+HEIG-VD - PLM & Web Course
+
